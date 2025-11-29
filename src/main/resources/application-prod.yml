@@ -1,6 +1,23 @@
 server:
   port: ${SERVER_PORT:8091}
 
+spring:
+  datasource:
+    url:
+    username:
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
 app:
   nasa:
     apiKey: ${NASA_API_KEY}

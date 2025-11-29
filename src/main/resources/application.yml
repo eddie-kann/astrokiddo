@@ -1,25 +1,3 @@
-server:
-  port: ${SERVER_PORT:8091}
-
-app:
-  nasa:
-    apiKey: ${NASA_API_KEY}
-    apodBaseUrl: ${APOD_BASE_URL:https://api.nasa.gov/planetary/apod}
-    imagesBaseUrl: ${IMAGES_BASE_URL:https://images-api.nasa.gov}
-  cloudflare:
-    enabled: ${CF_AI_ENABLED:true}
-    baseUrl: ${CF_AI_BASE_URL:https://api.cloudflare.com}
-    accountId: ${CF_ACCOUNT_ID}
-    cfAiProvider: ${CF_AI_PROVIDER:@cf}
-    cfAiVendor: ${CF_AI_VENDOR:meta}
-    cfAiModel: ${CF_AI_MODEL:llama-3-8b-instruct}
-    apiToken: ${CF_API_TOKEN}
-    maxVocabulary: ${CF_AI_MAX_VOCAB:3}
-    temperature: ${CF_AI_TEMPERATURE:0.6}
-logging:
-  level:
-    root: INFO
-    com.astrokiddo: DEBUG
-springdoc:
-  api-docs:
-    version: OPENAPI_3_0
+spring:
+  profiles:
+    default: dev
