@@ -33,6 +33,7 @@ app:
     apiToken: ${CF_API_TOKEN}
     maxVocabulary: ${CF_AI_MAX_VOCAB:3}
     temperature: ${CF_AI_TEMPERATURE:0.6}
+
 logging:
   level:
     root: INFO
