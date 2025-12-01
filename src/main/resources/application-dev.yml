@@ -3,10 +3,10 @@ server:
 
 spring:
   datasource:
-    url: jdbc:h2:mem:astrokiddo;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: ${SPRING_DATASOURCE_URL_DEV}
+    username: ${SPRING_DATASOURCE_USERNAME_DEV}
+    password: ${SPRING_DATASOURCE_PASSWORD_DEV}
     driver-class-name: org.h2.Driver
-    username: sa
-    password:
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,7 +15,6 @@ spring:
       hibernate:
         format_sql: true
         show_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: false
     locations: classpath:db/migration
@@ -36,9 +35,17 @@ app:
     cfAiProvider: ${CF_AI_PROVIDER:@cf}
     cfAiVendor: ${CF_AI_VENDOR:meta}
     cfAiModel: ${CF_AI_MODEL:llama-3-8b-instruct}
+    cfTtsVendor: ${CF_TTS_VENDOR:deepgram}
+    cfTtsModel: ${CF_TTS_MODEL:aura-2-en}
     apiToken: ${CF_API_TOKEN}
     maxVocabulary: ${CF_AI_MAX_VOCAB:3}
     temperature: ${CF_AI_TEMPERATURE:0.6}
+    r2:
+      account-id: ${R2_ACCOUNT_ID}
+      access-key: ${R2_ACCESS_KEY}
+      secret-key: ${R2_SECRET_KEY}
+      bucket: ${R2_BUCKET}
+      public-base-url: ${R2_PUBLIC_BASE_URL}
 
 logging:
   level:

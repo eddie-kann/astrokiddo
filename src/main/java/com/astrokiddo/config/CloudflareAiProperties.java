@@ -15,17 +15,23 @@ public class CloudflareAiProperties {
     private String cfAiProvider;
     private String cfAiVendor;
     private String cfAiModel;
+    private String cfTtsVendor;
+    private String cfTtsModel;
     private String apiToken;
     private boolean enabled = true;
     private int maxVocabulary = 3;
     private double temperature = 0.6;
 
-    public String getModel() {
+    public String getAiModel() {
         return cfAiProvider + "/" + cfAiVendor + "/" + cfAiModel;
     }
 
     public boolean isConfigured() {
         return hasText(accountId) && hasText(cfAiProvider) && hasText(cfAiVendor) && hasText(cfAiModel) && hasText(apiToken);
+    }
+
+    public boolean isTtsConfigured() {
+        return hasText(accountId) && hasText(cfAiProvider) && hasText(cfTtsVendor) && hasText(cfTtsModel) && hasText(apiToken);
     }
 
     private boolean hasText(String value) {

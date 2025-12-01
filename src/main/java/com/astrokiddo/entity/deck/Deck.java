@@ -41,6 +41,12 @@ public class Deck extends BaseEntity {
     @Column(name = "content_json", columnDefinition = "JSONB")
     private String contentJson;
 
+    @Column(name = "tts_audio_url", length = 1024)
+    private String ttsAudioUrl;
+
+    @Column(name = "tts_text_hash")
+    private String ttsTextHash;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

@@ -3,9 +3,10 @@ server:
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL_PROD}
+    username: ${SPRING_DATASOURCE_USERNAME_PROD}
+    password: ${SPRING_DATASOURCE_PASSWORD_PROD}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: validate
@@ -30,9 +31,17 @@ app:
     cfAiProvider: ${CF_AI_PROVIDER:@cf}
     cfAiVendor: ${CF_AI_VENDOR:meta}
     cfAiModel: ${CF_AI_MODEL:llama-3-8b-instruct}
+    cfTtsVendor: ${CF_TTS_VENDOR:deepgram}
+    cfTtsModel: ${CF_TTS_MODEL:aura-2-en}
     apiToken: ${CF_API_TOKEN}
     maxVocabulary: ${CF_AI_MAX_VOCAB:3}
     temperature: ${CF_AI_TEMPERATURE:0.6}
+    r2:
+      account-id: ${R2_ACCOUNT_ID}
+      access-key: ${R2_ACCESS_KEY}
+      secret-key: ${R2_SECRET_KEY}
+      bucket: ${R2_BUCKET}
+      public-base-url: ${R2_PUBLIC_BASE_URL}
 
 logging:
   level:
