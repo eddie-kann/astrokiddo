@@ -1,0 +1,3 @@
+ALTER TABLE decks
+    ADD COLUMN IF NOT EXISTS tts_audio_url VARCHAR(1024),
+    ADD COLUMN IF NOT EXISTS tts_text_hash VARCHAR(255);

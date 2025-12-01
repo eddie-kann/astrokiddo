@@ -1,6 +1,7 @@
 package com.astrokiddo.config;
 
 import io.netty.channel.ChannelOption;
+import io.netty.handler.logging.LogLevel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
+import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
 import java.time.Duration;
 
@@ -72,7 +74,8 @@ public class WebClientConfig {
                 .followRedirect(true)
                 .doOnConnected(conn -> conn
                         .addHandlerLast(new ReadTimeoutHandler(60))
-                        .addHandlerLast(new WriteTimeoutHandler(60)));
+                        .addHandlerLast(new WriteTimeoutHandler(60)))
+                .wiretap("com.astrokiddo.webclient", LogLevel.INFO, AdvancedByteBufFormat.TEXTUAL);
 
         return WebClient.builder()
                 .baseUrl(baseUrl)
@@ -82,6 +85,7 @@ public class WebClientConfig {
                         .codecs(c -> c.defaultCodecs().maxInMemorySize(8 * 1024 * 1024))
                         .build())
                 .filter(logRequest())
+                .filter(logResponse())
                 .build();
     }
 
@@ -89,6 +93,13 @@ public class WebClientConfig {
         return ExchangeFilterFunction.ofRequestProcessor(request -> {
             log.info("WebClient Request: {} {}", request.method(), request.url());
             return Mono.just(request);
+        });
+    }
+
+    private ExchangeFilterFunction logResponse() {
+        return ExchangeFilterFunction.ofResponseProcessor(response -> {
+            log.info("WebClient Response: {}", response.statusCode());
+            return Mono.just(response);
         });
     }
 }

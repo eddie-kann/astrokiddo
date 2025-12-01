@@ -30,7 +30,7 @@ public class ApodController {
             @RequestParam(value = "date", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        LocalDate targetDate = date != null ? date : LocalDate.now().minusMonths(5);
+        LocalDate targetDate = date != null ? date : LocalDate.now();
         return cache.getApod(targetDate)
                 .switchIfEmpty(Mono.just(new ApodResponseDto()))
                 .map(apod -> ResponseEntity.ok()

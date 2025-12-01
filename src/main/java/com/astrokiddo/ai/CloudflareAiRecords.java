@@ -43,7 +43,7 @@ public class CloudflareAiRecords {
             @NotBlank @Size(max = 500)
             @JsonProperty("class_question") String classQuestion,
 
-            @NotNull @Size(min = 0, max = 20) @Valid
+            @NotNull @Size(max = 20) @Valid
             @JsonProperty("vocabulary") List<VocabItem> vocabulary,
 
             @NotBlank @Size(max = 500)
@@ -56,27 +56,27 @@ public class CloudflareAiRecords {
             @JsonProperty("_meta") Meta meta
     ) {
         public boolean hasHook() {
-            return !isBlank(hook);
+            return isBlank(hook);
         }
 
         public boolean hasSimpleExplanation() {
-            return !isBlank(simpleExplanation);
+            return isBlank(simpleExplanation);
         }
 
         public boolean hasWhyItMatters() {
-            return !isBlank(whyItMatters);
+            return isBlank(whyItMatters);
         }
 
         public boolean hasClassQuestion() {
-            return !isBlank(classQuestion);
+            return isBlank(classQuestion);
         }
 
         public boolean hasFunFact() {
-            return !isBlank(funFact);
+            return isBlank(funFact);
         }
 
         public boolean hasAttribution() {
-            return !isBlank(attribution);
+            return isBlank(attribution);
         }
 
         public boolean hasVocabulary() {

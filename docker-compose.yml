@@ -1,11 +1,32 @@
 services:
+  postgresql:
+    image: postgres:16
+    container_name: astrokiddo-postgresql
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${SPRING_DATASOURCE_DB}
+      - POSTGRES_USER=${SPRING_DATASOURCE_USERNAME}
+      - POSTGRES_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - astrokiddo_net
+
   backend:
     build: .
     container_name: astrokiddo-backend
     expose:
       - "8091"
+    depends_on:
+      postgresql:
+        condition: service_started
     environment:
       - SERVER_PORT=8091
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
       - CF_API_TOKEN=${CF_API_TOKEN}
       - CF_ACCOUNT_ID=${CF_ACCOUNT_ID}
       - CF_AI_PROVIDER=${CF_AI_PROVIDER}
@@ -20,7 +41,7 @@ services:
       - NASA_API_KEY=${NASA_API_KEY}
     restart: unless-stopped
     networks:
-      - ai_net
+      - astrokiddo_net
 
   frontend:
     build: angular-app
@@ -32,8 +53,8 @@ services:
       - "80"
     restart: unless-stopped
     networks:
-      - ai_net
+      - astrokiddo_net
 
 networks:
-  ai_net:
+  astrokiddo_net:
     driver: bridge
