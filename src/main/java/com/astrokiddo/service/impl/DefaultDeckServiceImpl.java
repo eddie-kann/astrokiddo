@@ -2,6 +2,7 @@ package com.astrokiddo.service.impl;
 
 import com.astrokiddo.dto.GenerateDeckRequestDto;
 import com.astrokiddo.entity.deck.Deck;
+import com.astrokiddo.entity.deck.Slide;
 import com.astrokiddo.model.LessonDeck;
 import com.astrokiddo.service.DeckService;
 import com.astrokiddo.service.DeckCrudService;
@@ -17,9 +18,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class DefaultDeckServiceImpl implements DeckService {
@@ -122,7 +121,12 @@ public class DefaultDeckServiceImpl implements DeckService {
         deck.setNasaSource(toJson(buildNasaSource(request)));
         model.setGradeLevel(normalizeNullable(request.getGradeLevel()));
         model.setLocale(normalizeNullable(request.getLocale()));
-        deck.setContentJson(toJson(model));
+        if (deck.getSlides() == null) {
+            deck.setSlides(new ArrayList<>());
+        }
+        deck.getSlides().clear();
+        deck.getSlides().addAll(buildSlides(deck, model));
+        deck.setContentJson(toJson(copyWithoutSlides(model)));
         if (deck.getCreatedAt() == null) {
             deck.setCreatedAt(now);
         }
@@ -131,11 +135,8 @@ public class DefaultDeckServiceImpl implements DeckService {
 
         Deck saved = defaultDeckCrudService.saveOrUpdate(deck);
 
-        // keep model id stable if already present in stored json
-        if (model.getId() == null || model.getId().isBlank()) {
-            model.setId("deck-" + saved.getId());
-        }
-        model.setCreatedAt(saved.getCreatedAt());
+        syncModelFromEntity(saved, model);
+
         return model;
     }
 
@@ -149,30 +150,40 @@ public class DefaultDeckServiceImpl implements DeckService {
     }
 
     private LessonDeck toModel(Deck deck) {
-        if (deck.getContentJson() == null || deck.getContentJson().isBlank()) {
-            LessonDeck fallback = new LessonDeck(deck.getTopic(), deck.getGradeLevel(), deck.getLocale());
-            fallback.setId("deck-" + deck.getId());
-            fallback.setCreatedAt(deck.getCreatedAt());
-            return fallback;
+        LessonDeck model = new LessonDeck(deck.getTopic(), deck.getGradeLevel(), deck.getLocale());
+        model.setId("deck-" + deck.getId());
+        model.setCreatedAt(deck.getCreatedAt());
+        boolean hasSlides = deck.getSlides() != null && !deck.getSlides().isEmpty();
+        if (hasSlides) {
+            model.setSlides(deck.getSlides().stream().sorted(Comparator.comparingInt(a -> a.getPositionIndex() != null ? a.getPositionIndex() : 0))
+                    .map(this::toSlideModel)
+                    .toList());
         }
-        try {
-            LessonDeck model = objectMapper.readValue(deck.getContentJson(), LessonDeck.class);
-            if (model.getId() == null || model.getId().isBlank()) {
-                model.setId("deck-" + deck.getId());
+        if (deck.getContentJson() != null && !deck.getContentJson().isBlank()) {
+            try {
+                LessonDeck stored = objectMapper.readValue(deck.getContentJson(), LessonDeck.class);
+                if (stored.getEnrichment() != null) {
+                    model.setEnrichment(stored.getEnrichment());
+                }
+                if (!hasSlides && stored.getSlides() != null && !stored.getSlides().isEmpty()) {
+                    stored.getSlides().forEach(s -> {
+                        if (s.getSlideUuid() == null) {
+                            s.setSlideUuid(UUID.randomUUID());
+                        }
+                    });
+                    model.setSlides(stored.getSlides());
+                    if (deck.getSlides() == null) {
+                        deck.setSlides(new ArrayList<>());
+                    }
+                    deck.getSlides().clear();
+                    deck.getSlides().addAll(buildSlides(deck, model));
+                    defaultDeckCrudService.saveOrUpdate(deck);
+                }
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException("Failed to parse deck JSON for id " + deck.getId(), e);
             }
-            if (model.getCreatedAt() == null) {
-                model.setCreatedAt(deck.getCreatedAt());
-            }
-            if (model.getGradeLevel() == null) {
-                model.setGradeLevel(deck.getGradeLevel());
-            }
-            if (model.getLocale() == null) {
-                model.setLocale(deck.getLocale());
-            }
-            return model;
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to parse deck JSON for id " + deck.getId(), e);
         }
+        return model;
     }
 
     private String toJson(Object value) {
@@ -181,6 +192,62 @@ public class DefaultDeckServiceImpl implements DeckService {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Could not serialize deck content", e);
         }
+    }
+
+    private LessonDeck copyWithoutSlides(LessonDeck model) {
+        LessonDeck copy = new LessonDeck();
+        copy.setId(model.getId());
+        copy.setTopic(model.getTopic());
+        copy.setGradeLevel(model.getGradeLevel());
+        copy.setLocale(model.getLocale());
+        copy.setCreatedAt(model.getCreatedAt());
+        copy.setEnrichment(model.getEnrichment());
+        return copy;
+    }
+
+    private void syncModelFromEntity(Deck saved, LessonDeck model) {
+        if (model.getId() == null || model.getId().isBlank()) {
+            model.setId("deck-" + saved.getId());
+        }
+        model.setCreatedAt(saved.getCreatedAt());
+        if (saved.getSlides() != null) {
+            model.setSlides(saved.getSlides().stream()
+                    .sorted(Comparator.comparingInt(a -> a.getPositionIndex() != null ? a.getPositionIndex() : 0))
+                    .map(this::toSlideModel)
+                    .toList());
+        }
+    }
+
+    private List<Slide> buildSlides(Deck deck, LessonDeck model) {
+        List<Slide> slides = new ArrayList<>();
+        List<com.astrokiddo.model.Slide> slideModels = model.getSlides() != null ? model.getSlides() : List.of();
+        for (int i = 0; i < slideModels.size(); i++) {
+            com.astrokiddo.model.Slide slideModel = slideModels.get(i);
+            Slide slide = new Slide();
+            slide.setDeck(deck);
+            slide.setSlideUuid(slideModel.getSlideUuid() != null ? slideModel.getSlideUuid() : UUID.randomUUID());
+            slide.setType(slideModel.getType());
+            slide.setTitle(slideModel.getTitle());
+            slide.setText(slideModel.getText());
+            slide.setImageUrl(slideModel.getImageUrl());
+            slide.setAttribution(slideModel.getAttribution());
+            slide.setTtsAudioUrl(slideModel.getTtsAudioUrl());
+            slide.setPositionIndex(i);
+            slides.add(slide);
+        }
+        return slides;
+    }
+
+    private com.astrokiddo.model.Slide toSlideModel(Slide slide) {
+        com.astrokiddo.model.Slide model = new com.astrokiddo.model.Slide();
+        model.setSlideUuid(slide.getSlideUuid());
+        model.setType(slide.getType());
+        model.setTitle(slide.getTitle());
+        model.setText(slide.getText());
+        model.setImageUrl(slide.getImageUrl());
+        model.setAttribution(slide.getAttribution());
+        model.setTtsAudioUrl(slide.getTtsAudioUrl());
+        return model;
     }
 
     private String normalize(String value) {

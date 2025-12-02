@@ -1,15 +1,13 @@
 package com.astrokiddo.entity.deck;
 
 import com.astrokiddo.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,11 +39,9 @@ public class Deck extends BaseEntity {
     @Column(name = "content_json", columnDefinition = "JSONB")
     private String contentJson;
 
-    @Column(name = "tts_audio_url", length = 1024)
-    private String ttsAudioUrl;
-
-    @Column(name = "tts_text_hash")
-    private String ttsTextHash;
+    @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("positionIndex ASC, id ASC")
+    private List<Slide> slides = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
