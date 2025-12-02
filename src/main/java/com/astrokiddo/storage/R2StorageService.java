@@ -1,12 +1,14 @@
 package com.astrokiddo.storage;
 
 import com.astrokiddo.config.CloudflareR2Properties;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
 public class R2StorageService {
@@ -19,6 +21,22 @@ public class R2StorageService {
     public R2StorageService(S3Client s3Client, CloudflareR2Properties properties) {
         this.s3Client = s3Client;
         this.properties = properties;
+    }
+
+    @PostConstruct
+    public void checkR2OnInit() {
+        String bucket = properties.getBucket();
+        log.info("Checking R2 in R2StorageService init, bucket={}", bucket);
+        try {
+            s3Client.listObjectsV2(b -> b.bucket(bucket).maxKeys(1));
+            log.info("R2 init check OK for bucket={}", bucket);
+        } catch (S3Exception e) {
+            log.error("R2 init check FAILED for bucket={}: {}",
+                    bucket,
+                    e.awsErrorDetails() != null ? e.awsErrorDetails().errorMessage() : e.getMessage(),
+                    e
+            );
+        }
     }
 
     public String saveAudio(String objectKey, byte[] data) {

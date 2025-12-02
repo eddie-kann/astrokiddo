@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8091}
+  port: ${SERVER_PORT}
 
 spring:
   datasource:
@@ -24,22 +24,23 @@ spring:
       path: /h2-console
 
 app:
+  time-zone: ${APP_TIME_ZONE}
   nasa:
     apiKey: ${NASA_API_KEY}
-    apodBaseUrl: ${APOD_BASE_URL:https://api.nasa.gov/planetary/apod}
-    imagesBaseUrl: ${IMAGES_BASE_URL:https://images-api.nasa.gov}
+    apodBaseUrl: ${APOD_BASE_URL}
+    imagesBaseUrl: ${IMAGES_BASE_URL}
   cloudflare:
-    enabled: ${CF_AI_ENABLED:true}
-    baseUrl: ${CF_AI_BASE_URL:https://api.cloudflare.com}
+    enabled: ${CF_AI_ENABLED}
+    baseUrl: ${CF_AI_BASE_URL}
     accountId: ${CF_ACCOUNT_ID}
-    cfAiProvider: ${CF_AI_PROVIDER:@cf}
-    cfAiVendor: ${CF_AI_VENDOR:meta}
-    cfAiModel: ${CF_AI_MODEL:llama-3-8b-instruct}
-    cfTtsVendor: ${CF_TTS_VENDOR:deepgram}
-    cfTtsModel: ${CF_TTS_MODEL:aura-2-en}
+    cfAiProvider: ${CF_AI_PROVIDER}
+    cfAiVendor: ${CF_AI_VENDOR}
+    cfAiModel: ${CF_AI_MODEL}
+    cfTtsVendor: ${CF_TTS_VENDOR}
+    cfTtsModel: ${CF_TTS_MODEL}
     apiToken: ${CF_API_TOKEN}
-    maxVocabulary: ${CF_AI_MAX_VOCAB:3}
-    temperature: ${CF_AI_TEMPERATURE:0.6}
+    maxVocabulary: ${CF_AI_MAX_VOCAB}
+    temperature: ${CF_AI_TEMPERATURE}
     r2:
       account-id: ${R2_ACCOUNT_ID}
       access-key: ${R2_ACCESS_KEY}

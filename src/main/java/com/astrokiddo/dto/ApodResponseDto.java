@@ -10,17 +10,15 @@ public class ApodResponseDto {
     private String date;
     private String title;
     private String explanation;
-
     @JsonProperty("media_type")
     private String mediaType;
-
     private String url;
     private String hdurl;
-
     @JsonProperty("thumbnail_url")
     private String thumbnailUrl;
-
     private String copyright;
     @JsonProperty("service_version")
     private String serviceVersion;
+    @JsonProperty("tts_audio_url")
+    private String ttsAudioUrl;
 }
