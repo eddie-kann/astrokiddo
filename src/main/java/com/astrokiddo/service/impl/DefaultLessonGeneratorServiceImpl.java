@@ -1,7 +1,7 @@
 package com.astrokiddo.service.impl;
 
-import com.astrokiddo.ai.CloudflareAiRecords;
-import com.astrokiddo.ai.CloudflareAiService;
+import com.astrokiddo.cloudflare.CloudflareAiRecords;
+import com.astrokiddo.cloudflare.CloudflareAiService;
 import com.astrokiddo.dto.GenerateDeckRequestDto;
 import com.astrokiddo.dto.ImageSearchResponseDto;
 import com.astrokiddo.model.LessonDeck;

@@ -33,6 +33,10 @@ replay_pid*
 out/
 target/
 
+# Development DBs
+db/
+dev-db/
+
 # Gradle
 .gradle/
 build/

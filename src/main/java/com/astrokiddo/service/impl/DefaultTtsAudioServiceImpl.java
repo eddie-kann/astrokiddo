@@ -1,6 +1,6 @@
 package com.astrokiddo.service.impl;
 
-import com.astrokiddo.ai.CloudflareTtsClient;
+import com.astrokiddo.cloudflare.CloudflareTtsClient;
 import com.astrokiddo.repository.DeckRepository;
 import com.astrokiddo.service.TtsAudioService;
 import com.astrokiddo.storage.R2StorageService;

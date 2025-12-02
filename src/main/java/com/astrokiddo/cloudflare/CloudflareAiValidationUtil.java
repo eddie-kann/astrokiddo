@@ -1,4 +1,4 @@
-package com.astrokiddo.ai;
+package com.astrokiddo.cloudflare;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;

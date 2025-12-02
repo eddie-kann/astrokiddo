@@ -1,4 +1,4 @@
-package com.astrokiddo.ai;
+package com.astrokiddo.cloudflare;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

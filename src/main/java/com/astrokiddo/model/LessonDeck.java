@@ -1,6 +1,6 @@
 package com.astrokiddo.model;
 
-import com.astrokiddo.ai.CloudflareAiRecords;
+import com.astrokiddo.cloudflare.CloudflareAiRecords;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
