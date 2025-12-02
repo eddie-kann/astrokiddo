@@ -1,4 +1,4 @@
-package com.astrokiddo.ai;
+package com.astrokiddo.cloudflare;
 
 import com.astrokiddo.config.CloudflareAiProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,4 +1,4 @@
-package com.astrokiddo.ai;
+package com.astrokiddo.cloudflare;
 
 import com.astrokiddo.config.CloudflareAiProperties;
 import org.slf4j.Logger;

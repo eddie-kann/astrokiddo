@@ -13,4 +13,4 @@ WORKDIR /app
 ENV SERVER_PORT=8091
 EXPOSE 8091
 COPY --from=build /app/target/astrokiddo-0.1.0.jar app.jar
-ENTRYPOINT ["sh","-c","java -jar /app/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar", "--spring.profiles.active=prod"]
