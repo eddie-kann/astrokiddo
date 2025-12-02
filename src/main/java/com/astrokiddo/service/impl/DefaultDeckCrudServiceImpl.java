@@ -1,7 +1,7 @@
 package com.astrokiddo.service.impl;
 
 import com.astrokiddo.entity.deck.Deck;
-import com.astrokiddo.repository.DeckRepository;
+import com.astrokiddo.repository.deck.DeckRepository;
 import com.astrokiddo.service.DeckCrudService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-package com.astrokiddo.repository;
+package com.astrokiddo.repository.deck;
 
 import com.astrokiddo.entity.deck.Deck;
 import org.springframework.data.jpa.repository.JpaRepository;

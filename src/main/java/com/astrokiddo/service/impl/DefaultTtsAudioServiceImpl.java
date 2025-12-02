@@ -1,7 +1,7 @@
 package com.astrokiddo.service.impl;
 
 import com.astrokiddo.cloudflare.CloudflareTtsClient;
-import com.astrokiddo.repository.DeckRepository;
+import com.astrokiddo.repository.deck.DeckRepository;
 import com.astrokiddo.service.TtsAudioService;
 import com.astrokiddo.storage.R2StorageService;
 import org.springframework.stereotype.Service;
