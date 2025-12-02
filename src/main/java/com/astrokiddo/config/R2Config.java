@@ -17,6 +17,7 @@ public class R2Config {
     public S3Client r2S3Client(CloudflareR2Properties properties) {
         S3Configuration s3Configuration = S3Configuration.builder()
                 .pathStyleAccessEnabled(true)
+                .chunkedEncodingEnabled(false)
                 .build();
 
         return S3Client.builder()
