@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -95,29 +96,35 @@ public class DefaultDeckServiceImpl implements DeckService {
     protected Mono<LessonDeck> saveDeck(Deck entity, LessonDeck model, GenerateDeckRequestDto request, String deckKey) {
         Deck deck = entity != null ? entity : new Deck();
         Instant now = Instant.now();
-        deck.setDeckKey(deckKey);
-        deck.setTopic(model.getTopic());
-        deck.setGradeLevel(normalizeNullable(request.getGradeLevel()));
-        deck.setLocale(normalizeNullable(request.getLocale()));
-        deck.setTitle(model.getTopic());
-        deck.setDescription("Lesson deck for topic: " + model.getTopic());
-        deck.setNasaSource(toJson(buildNasaSource(request)));
         model.setGradeLevel(normalizeNullable(request.getGradeLevel()));
         model.setLocale(normalizeNullable(request.getLocale()));
-        deck.setContentJson(toJson(copyWithoutSlides(model)));
-        if (deck.getCreatedAt() == null) {
-            deck.setCreatedAt(now);
-        }
-        deck.setUpdatedAt(now);
-        deck.setExpiresAt(now.plus(VALIDITY));
+        Mono<String> nasaSourceMono = toJson(buildNasaSource(request));
+        Mono<String> contentJsonMono = toJson(copyWithoutSlides(model));
 
-        return defaultDeckCrudService.saveOrUpdate(deck)
-                .flatMap(saved -> persistSlides(saved, model)
-                        .doOnNext(saved::setSlides)
-                        .thenReturn(saved))
-                .flatMap(saved -> {
-                    syncModelFromEntity(saved, model);
-                    return Mono.just(model);
+        return Mono.zip(nasaSourceMono, contentJsonMono)
+                .flatMap(tuple -> {
+                    deck.setDeckKey(deckKey);
+                    deck.setTopic(model.getTopic());
+                    deck.setGradeLevel(model.getGradeLevel());
+                    deck.setLocale(model.getLocale());
+                    deck.setTitle(model.getTopic());
+                    deck.setDescription("Lesson deck for topic: " + model.getTopic());
+                    deck.setNasaSource(tuple.getT1());
+                    deck.setContentJson(tuple.getT2());
+                    if (deck.getCreatedAt() == null) {
+                        deck.setCreatedAt(now);
+                    }
+                    deck.setUpdatedAt(now);
+                    deck.setExpiresAt(now.plus(VALIDITY));
+
+                    return defaultDeckCrudService.saveOrUpdate(deck)
+                            .flatMap(saved -> persistSlides(saved, model)
+                                    .doOnNext(saved::setSlides)
+                                    .thenReturn(saved))
+                            .flatMap(saved -> {
+                                syncModelFromEntity(saved, model);
+                                return Mono.just(model);
+                            });
                 });
     }
 
@@ -140,10 +147,10 @@ public class DefaultDeckServiceImpl implements DeckService {
     private Mono<LessonDeck> toModelWithSlides(Deck deck) {
         return slideRepository.findByDeckIdOrderByPositionIndexAsc(deck.getId())
                 .collectList()
-                .map(slides -> {
+                .flatMap(slides -> Mono.fromCallable(() -> {
                     deck.setSlides(slides);
                     return toModel(deck);
-                });
+                }).subscribeOn(Schedulers.boundedElastic()));
     }
 
     private LessonDeck toModel(Deck deck) {
@@ -177,12 +184,11 @@ public class DefaultDeckServiceImpl implements DeckService {
         return model;
     }
 
-    private String toJson(Object value) {
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Could not serialize deck content", e);
-        }
+    private Mono<String> toJson(Object value) {
+        return Mono.fromCallable(() -> objectMapper.writeValueAsString(value))
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorMap(JsonProcessingException.class,
+                        e -> new IllegalStateException("Could not serialize deck content", e));
     }
 
     private LessonDeck copyWithoutSlides(LessonDeck model) {

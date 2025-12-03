@@ -1,7 +1,6 @@
 package com.astrokiddo.cloudflare;
 
 import com.astrokiddo.config.CloudflareAiProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
@@ -23,11 +23,13 @@ public class CloudflareAiService {
 
     private final WebClient client;
     private final CloudflareAiProperties properties;
+    private final ObjectMapper objectMapper;
 
     public CloudflareAiService(WebClient cloudflareAiWebClient,
-                               CloudflareAiProperties properties) {
+                               CloudflareAiProperties properties, ObjectMapper objectMapper) {
         this.client = cloudflareAiWebClient;
         this.properties = properties;
+        this.objectMapper = objectMapper;
     }
 
     public Mono<CloudflareAiRecords.EnrichmentResponse> enrich(String topic, String gradeLevel) {
@@ -35,8 +37,10 @@ public class CloudflareAiService {
             return Mono.empty();
         }
         CloudflareAiRequest request = buildRequest(topic, gradeLevel);
-        log.info("Request: {}", request);
-        return client.post()
+        return Mono.fromCallable(() -> objectMapper.writeValueAsString(request))
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnNext(json -> log.info("Request: {}", json))
+                .then(client.post()
                 .uri(b -> b.path("/client/v4/accounts/{accountId}/ai/run/")
                         .pathSegment("{cfAiProvider}", "{cfAiVendor}", "{cfAiModel}")
                         .build(
@@ -57,7 +61,7 @@ public class CloudflareAiService {
                         .jitter(0.2)
                         .filter(this::isTransient))
                 .map(env -> env.result().response())
-                .doOnError(ex -> log.warn("Cloudflare AI call failed: {}", ex.getMessage()));
+                        .doOnError(ex -> log.warn("Cloudflare AI call failed: {}", ex.getMessage())));
     }
 
     private boolean isTransient(Throwable throwable) {
@@ -159,14 +163,6 @@ public class CloudflareAiService {
 
     private record CloudflareAiRequest(List<CloudflareAiMessage> messages,
                                        CloudflareAiResponseFormat response_format) {
-        public String toString() {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                return mapper.writeValueAsString(this);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     private record CloudflareAiResponseFormat(String type, CloudflareAiJsonSchema json_schema) {
