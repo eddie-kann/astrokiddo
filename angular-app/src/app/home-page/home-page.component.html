@@ -1,0 +1,108 @@
+<div class="grid gap-6">
+  <div class="glass-panel p-6 flex flex-col gap-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="text-sm uppercase tracking-widest text-cosmic-muted">Astronomy Picture of the Day</div>
+        <h1 class="text-3xl font-semibold text-white mt-1">Explore the cosmos, one day at a time</h1>
+        <p class="text-cosmic-muted mt-2 max-w-2xl">Choose a date to see NASA's featured image or video, zoom into the
+        photo, and listen to narration when available.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <i nz-icon nzType="calendar" nzTheme="outline" class="text-cosmic-accent"></i>
+        <nz-date-picker
+          nzAllowClear
+          nzInputReadOnly
+          [ngModel]="selectedDate"
+          (ngModelChange)="onDateChange($event)"
+          nzPlaceHolder="Pick a date"
+          class="w-52">
+        </nz-date-picker>
+      </div>
+    </div>
+    <div class="relative">
+      @if (loading) {
+        <div class="absolute inset-0 flex items-center justify-center">
+          <nz-spin nzSimple [nzIndicator]="null"></nz-spin>
+        </div>
+      }
+      @if (!loading) {
+        @if (apod) {
+          <nz-card class="glass-panel" [nzBodyStyle]="{padding: '24px'}">
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div class="text-sm text-cosmic-muted">{{ apod.date | date: 'longDate' }}</div>
+                  <div class="text-2xl font-semibold text-white">{{ apod.title || 'Astronomy Picture of the Day' }}</div>
+                </div>
+                @if (apod.ttsAudioUrl) {
+                  <div class="flex items-center gap-3">
+                    <div class="waveform" [class.waveform-paused]="!playing">
+                      @for (bar of [1,2,3,4,5,6,7,8,9,10]; track bar; let i = $index) {
+                        <span
+                        [style.animationDelay]="(i * 0.08) + 's'"></span>
+                      }
+                    </div>
+                    <button nz-button nzShape="round" nzType="default" class="bg-white/5" (click)="toggleAudio()">
+                      <i nz-icon [nzType]="playing ? 'pause' : 'audio'" nzTheme="outline"></i>
+                      <span class="ml-1">{{ playing ? 'Pause' : 'Play' }} narration</span>
+                    </button>
+                  </div>
+                }
+              </div>
+              <div class="grid md:grid-cols-2 gap-4 items-start">
+                <div class="bg-black/40 rounded-xl overflow-hidden border border-white/5 shadow-cosmic-glow">
+                  @if (mediaIsImage) {
+                    <nz-image
+                      class="block w-full"
+                      [nzSrc]="apod.hdurl || apod.url"
+                      [nzAlt]="apod.title || 'Astronomy Picture of the Day'"
+                      nzDisablePreview="false">
+                    </nz-image>
+                  } @else {
+                    <div class="relative">
+                      @if (apod.thumbnail_url) {
+                        <nz-image
+                          class="block w-full"
+                          [nzSrc]="apod.thumbnail_url"
+                          [nzAlt]="apod.title || 'Astronomy Picture of the Day'"
+                          nzDisablePreview="false">
+                        </nz-image>
+                      }
+                      <div class="absolute inset-0 flex items-center justify-center">
+                        <a
+                          class="px-4 py-2 bg-cosmic-accent text-black font-semibold rounded-full shadow-lg flex items-center gap-2"
+                          [href]="apod.url"
+                          target="_blank"
+                          rel="noreferrer noopener">
+                          <i nz-icon nzType="video-camera" nzTheme="outline"></i>
+                          View Video
+                        </a>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <div class="glass-panel p-4 h-full overflow-y-auto space-y-4">
+                  <div class="text-sm text-cosmic-muted">Explanation</div>
+                  <p class="leading-relaxed text-gray-200 whitespace-pre-line">{{ apod.explanation }}</p>
+                  <div class="flex items-center justify-between text-xs text-cosmic-muted">
+                    @if (apod.media_type && !mediaIsImage && apod.url) {
+                      <span>
+                        <i nz-icon nzType="play-circle"></i> Media type: {{ apod.media_type | titlecase }}
+                      </span>
+                    }
+                    @if (apod.copyright) {
+                      <span>© {{ apod.copyright }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </nz-card>
+        }
+        @if (error) {
+          <div class="glass-panel p-4 text-red-200">{{ error }}</div>
+        }
+      }
+    </div>
+  </div>
+</div>

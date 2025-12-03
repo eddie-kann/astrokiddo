@@ -1,12 +1,13 @@
 import {Routes} from '@angular/router';
-import {AboutComponent} from './about/about.component';
-import {DecksComponent} from './decks/decks.component';
-import {HomeComponent} from './home/home.component';
+import {HomePageComponent} from './home-page/home-page.component';
+import {DecksPageComponent} from './decks-page/decks-page.component';
+import {AboutPageComponent} from './about-page/about-page.component';
 
 export const routes: Routes = [
-  {path: '', component: HomeComponent, pathMatch: 'full'},
-  {path: 'decks', component: DecksComponent},
-  {path: 'about', component: AboutComponent},
-  {path: '**', redirectTo: ''}
+  {path: '', pathMatch: 'full', redirectTo: 'home'},
+  {path: 'home', component: HomePageComponent, title: 'AstroKiddo · Home'},
+  {path: 'decks', component: DecksPageComponent, title: 'AstroKiddo · Lesson Decks'},
+  {path: 'about', component: AboutPageComponent, title: 'AstroKiddo · About'},
+  {path: '**', redirectTo: 'home'}
 ];
 

@@ -1,0 +1,35 @@
+<div class="grid gap-6">
+  <nz-card class="glass-panel" [nzBodyStyle]="{padding: '24px'}">
+    <div class="flex flex-col items-center text-center gap-3">
+      <div class="text-sm uppercase tracking-widest text-cosmic-muted">About</div>
+      <h1 class="text-3xl font-semibold text-white">AstroKiddo</h1>
+      <p class="text-cosmic-muted max-w-3xl">Developed by the Eddie Kann. Contact via <a
+      href="https://github.com/eddie-kann/astrokiddo" target="_blank" rel="noreferrer noopener">GitHub</a> for feedback or collaboration
+    ideas.</p>
+    <div class="flex flex-wrap items-center justify-center gap-3 text-sm text-cosmic-muted">
+      <span class="px-3 py-1 rounded-full bg-white/5">Thanks to NASA for APOD and media APIs.</span>
+      <span class="px-3 py-1 rounded-full bg-white/5">Supported by Florida Tech.</span>
+      <span class="px-3 py-1 rounded-full bg-white/5">Keep exploring ✨</span>
+    </div>
+  </div>
+</nz-card>
+
+<div class="grid md:grid-cols-2 gap-4">
+  @for (item of highlights; track item) {
+    <nz-card class="glass-panel" [nzBodyStyle]="{padding: '20px'}">
+      <div class="flex items-start gap-3">
+        <div class="text-3xl">{{ item.emoji }}</div>
+        <div class="space-y-2">
+          <div class="text-xl text-white font-semibold">{{ item.title }}</div>
+          <p class="text-cosmic-muted">{{ item.description }}</p>
+          <a [href]="item.href" target="_blank" rel="noreferrer noopener"
+            class="inline-flex items-center gap-1 text-cosmic-accent">
+            Learn more
+            <i nz-icon nzType="arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </nz-card>
+  }
+</div>
+</div>

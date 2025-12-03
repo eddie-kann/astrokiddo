@@ -1,0 +1,218 @@
+<div class="flex flex-col gap-6">
+  <div class="glass-panel p-6 relative overflow-hidden">
+    <div
+    class="absolute inset-0 opacity-20 bg-gradient-to-br from-cosmic-accent/40 via-transparent to-transparent pointer-events-none"></div>
+    <div class="relative flex flex-col gap-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="text-sm uppercase tracking-widest text-cosmic-muted">Lesson deck generator</div>
+          <h1 class="text-3xl font-semibold text-white">Craft cosmic lesson plans</h1>
+          <p class="text-cosmic-muted max-w-2xl">Describe the topic, pick a grade band, and launch a slideshow-ready
+          deck. A rocket loader will keep you company while we build it.</p>
+        </div>
+        <button nz-button nzType="primary" nzShape="round" class="bg-cosmic-accent border-cosmic-accent"
+          (click)="generateDeck()" [disabled]="loading">
+          <i nz-icon nzType="rocket" nzTheme="outline"></i>
+          <span class="ml-1">{{ loading ? 'Generating...' : 'Generate Deck' }}</span>
+        </button>
+      </div>
+
+      <form nz-form [formGroup]="form" class="grid md:grid-cols-3 gap-4">
+        <nz-form-item>
+          <nz-form-control nzHasFeedback>
+            <input nz-input placeholder="Topic" formControlName="topic"/>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <nz-select formControlName="gradeLevel" nzPlaceHolder="Grade level">
+              <nz-option nzValue="3-5" nzLabel="Grades 3-5"></nz-option>
+              <nz-option nzValue="6-8" nzLabel="Grades 6-8"></nz-option>
+              <nz-option nzValue="8-10" nzLabel="Grades 8-10"></nz-option>
+              <nz-option nzValue="10-12" nzLabel="Grades 10-12"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <nz-select formControlName="locale" nzPlaceHolder="Locale">
+              <nz-option nzValue="en" nzLabel="English (US)"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+
+      @if (error) {
+        <div class="text-red-200 text-sm">{{ error }}</div>
+      }
+    </div>
+
+    @if (loading) {
+      <div
+        class="absolute inset-0 bg-black/40 backdrop-blur flex flex-col items-center justify-center text-white gap-3">
+        <nz-spin nzSimple [nzIndicator]="null"></nz-spin>
+        <div class="flex items-center gap-2 text-cosmic-text">
+          <i nz-icon nzType="rocket" class="text-cosmic-accent"></i>
+          Launching your deck...
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="flex items-center justify-between gap-3">
+    <div class="section-title flex items-center gap-2">
+      <i nz-icon nzType="appstore"></i>
+      Existing Decks
+    </div>
+    <button nz-button nzType="default" nzShape="round" class="bg-white/5" (click)="fetchDecks()"
+      [disabled]="listLoading">
+      @if (listLoading) {
+        <i nz-icon nzType="loading"></i>
+      }
+      <span class="ml-1">Refresh</span>
+    </button>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-4">
+    @for (deck of decks; track trackDeck($index, deck)) {
+      <nz-card
+        class="glass-panel"
+        [nzBodyStyle]="{padding: '20px'}"
+        [nzTitle]="deck.topic">
+        <div class="flex flex-col gap-3">
+          <div class="flex flex-wrap items-center gap-2 text-sm text-cosmic-muted">
+            <span class="px-2 py-1 rounded-full bg-white/5">Deck ID: {{ deck.id }}</span>
+            <span class="px-2 py-1 rounded-full bg-white/5">Created: {{ deck.createdAt | date:'medium' }}</span>
+            @if (deck.enrichment?.meta?.model) {
+              <nz-tag nzColor="blue">{{ deck.enrichment?.meta?.model }}</nz-tag>
+            }
+          </div>
+          <div class="text-cosmic-text text-sm deck-summary">
+            {{ deck.enrichment?.hook || 'A ready-to-teach deck with slides, imagery, and talking points.' }}
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button nz-button nzType="primary" nzShape="round" class="bg-cosmic-accent border-cosmic-accent"
+              (click)="openSlideshow(deck)">
+              <i nz-icon nzType="play-circle"></i>
+              <span class="ml-1">Play Slideshow</span>
+            </button>
+            <button nz-button nzType="default" (click)="export(deck, 'html')">
+              <i nz-icon nzType="cloud-download"></i>
+              HTML
+            </button>
+            <button nz-button nzType="default" (click)="export(deck, 'pdf')">
+              <i nz-icon nzType="file-pdf"></i>
+              PDF
+            </button>
+          </div>
+        </div>
+      </nz-card>
+    }
+  </div>
+
+  @if (!decks.length && !listLoading) {
+    <div class="glass-panel p-6 text-center text-cosmic-muted">
+      No decks yet. Generate one to see it here!
+    </div>
+  }
+
+  <nz-modal
+    [(nzVisible)]="showSlideshow"
+    [nzFooter]="null"
+    nzCentered
+    nzWrapClassName="slideshow-modal"
+    [nzWidth]="'100vw'"
+    (nzOnCancel)="closeSlideshow()">
+    <div class="slideshow-stage">
+      <div class="slideshow-header">
+        <div>
+          <div class="text-sm text-cosmic-muted">{{ selectedDeck?.id }}</div>
+          <div class="text-xl text-white font-semibold">{{ selectedDeck?.topic }}</div>
+        </div>
+        <button nz-button nzShape="circle" nzType="default" (click)="closeSlideshow()">
+          ✕
+        </button>
+      </div>
+      <div class="slideshow-wrapper glass-panel">
+        <div class="reveal" #revealRoot>
+          <div class="slides">
+            @if (selectedDeck) {
+              <section>
+                <h2>{{ selectedDeck.topic }}</h2>
+                <div class="cover-meta">Deck ID: {{ selectedDeck.id }}</div>
+                <div class="cover-meta">Generated: {{ selectedDeck.createdAt | date: 'medium' }}</div>
+                @if (lastRequest?.gradeLevel) {
+                  <div class="cover-meta">Grade Level: {{ lastRequest?.gradeLevel }}</div>
+                }
+                @if (selectedDeck.enrichment?.hook) {
+                  <div class="cover-sub">{{ selectedDeck.enrichment?.hook }}</div>
+                }
+              </section>
+            }
+            @for (slide of selectedDeck?.slides; track trackSlide($index, slide)) {
+              <section>
+                @if (slide.title) {
+                  <h3>{{ slide.title }}</h3>
+                }
+                @if (slide.imageUrl) {
+                  <nz-image [nzSrc]="slide.imageUrl"
+                  [nzAlt]="slide.title || 'Slide image'"></nz-image>
+                }
+                @if (slide.text) {
+                  <div class="slide-note">{{ slide.text }}</div>
+                }
+                <div class="slide-footer">{{ slide.type }}</div>
+                @if (slide.attribution) {
+                  <div class="slide-attribution">© {{ slide.attribution }}</div>
+                }
+              </section>
+            }
+            @if (selectedDeck?.enrichment?.simple_explanation) {
+              <section>
+                <h3>Simple Explanation</h3>
+                <div class="slide-note">{{ selectedDeck?.enrichment?.simple_explanation }}</div>
+              </section>
+            }
+            @if (selectedDeck?.enrichment?.why_it_matters) {
+              <section>
+                <h3>Why It Matters</h3>
+                <div class="slide-note">{{ selectedDeck?.enrichment?.why_it_matters }}</div>
+              </section>
+            }
+            @if (selectedDeck?.enrichment?.class_question) {
+              <section>
+                <h3>Class Question</h3>
+                <div class="slide-note">{{ selectedDeck?.enrichment?.class_question }}</div>
+              </section>
+            }
+            @if (selectedDeck?.enrichment?.fun_fact) {
+              <section>
+                <h3>Fun Fact</h3>
+                <div class="slide-note">{{ selectedDeck?.enrichment?.fun_fact }}</div>
+              </section>
+            }
+            @if (selectedDeck?.enrichment?.vocabulary?.length) {
+              <section>
+                <h3>Vocabulary</h3>
+                <ul>
+                  @for (term of selectedDeck?.enrichment?.vocabulary; track term) {
+                    <li>
+                      <div class="term">{{ term.term }}</div>
+                      <div class="definition">{{ term.definition }}</div>
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+            @if (selectedDeck?.enrichment?.attribution) {
+              <section>
+                <h3>Attribution</h3>
+                <div class="slide-note">{{ selectedDeck?.enrichment?.attribution }}</div>
+              </section>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </nz-modal>
+</div>

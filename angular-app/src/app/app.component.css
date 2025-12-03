@@ -1,20 +1,7 @@
-.top-bar{
-  position:sticky;
-  top:0;
-  z-index:50;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:16px 24px;
-  background:rgba(11,13,18,0.9);
-  border-bottom:1px solid #222a35;
-  backdrop-filter:blur(8px);
+:host {
+  display: block;
 }
-.brand{font-size:18px;font-weight:700;letter-spacing:0.04em}
-.nav-links{display:flex;gap:14px;align-items:center}
-.nav-links a{color:#d6deed;text-decoration:none;font-weight:600;padding:6px 10px;border-radius:10px}
-.nav-links a:hover,.nav-links a.active{background:rgba(106,169,255,0.14);color:#e8f0ff}
-.nav-icons{display:flex;gap:10px;align-items:center;font-size:18px}
-.nav-icons a{text-decoration:none}
-.nav-icons a:hover{transform:translateY(-1px)}
-.page-shell{padding:8px 0 24px}
+
+nz-header {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
