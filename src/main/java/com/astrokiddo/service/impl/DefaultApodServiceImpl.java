@@ -11,6 +11,7 @@ import com.astrokiddo.storage.R2StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -54,27 +55,25 @@ public class DefaultApodServiceImpl implements ApodService {
 
     @Override
     public Mono<ApodResponseDto> getOrCreateApod(LocalDate date) {
-        return Mono.defer(() -> {
-                    LocalDate targetDate = date != null ? date : LocalDate.now(zoneId);
-                    return Mono.fromCallable(() -> apodRepository.findByApodDate(targetDate))
-                            .subscribeOn(Schedulers.boundedElastic())
-                            .flatMap(found -> found.map(apod -> Mono.just(toDto(apod))).orElseGet(Mono::empty))
-                            .switchIfEmpty(fetchAndPersistApod(targetDate));
-                }
-        );
+        LocalDate targetDate = date != null ? date : LocalDate.now(zoneId);
+        return apodRepository.findByApodDate(targetDate)
+                .map(this::toDto)
+                .switchIfEmpty(fetchAndPersistApod(targetDate));
     }
 
     @Override
     public Mono<Page<ApodResponseDto>> listApods(Pageable pageable) {
-        return Mono.fromCallable(() -> {
-                    Pageable pageableWithSort = pageable;
-                    if (pageable.getSort().isUnsorted()) {
-                        pageableWithSort = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                                Sort.by(Sort.Direction.DESC, "apodDate"));
-                    }
-                    return apodRepository.findAllByOrderByApodDateDesc(pageableWithSort).map(this::toDto);
-                })
-                .subscribeOn(Schedulers.boundedElastic());
+        Pageable pageableWithSort = pageable;
+        if (pageable.getSort().isUnsorted()) {
+            pageableWithSort = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                    Sort.by(Sort.Direction.DESC, "apodDate"));
+        }
+
+        Pageable finalPageable = pageableWithSort;
+        return apodRepository.findAllByOrderByApodDateDesc(finalPageable)
+                .map(this::toDto)
+                .collectList()
+                .zipWith(apodRepository.count(), (items, total) -> new PageImpl<>(items, finalPageable, total));
     }
 
     private Mono<ApodResponseDto> fetchAndPersistApod(LocalDate targetDate) {
@@ -88,8 +87,7 @@ public class DefaultApodServiceImpl implements ApodService {
 
                     return generateTtsAudio(apodDate, apiResponse.getExplanation())
                             .doOnNext(apod::setTtsAudioUrl)
-                            .then(Mono.fromCallable(() -> apodRepository.save(apod))
-                                    .subscribeOn(Schedulers.boundedElastic()))
+                            .then(apodRepository.save(apod))
                             .map(this::toDto);
                 });
     }

@@ -1,9 +1,11 @@
 package com.astrokiddo.entity.deck;
 
 import com.astrokiddo.entity.BaseEntity;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -11,58 +13,42 @@ import java.util.List;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "decks")
+@Table("decks")
 public class Deck extends BaseEntity {
 
-    @Column(name = "deck_key", nullable = false, unique = true)
+    @Column("deck_key")
     private String deckKey;
 
-    @Column(name = "topic", nullable = false)
+    @Column("topic")
     private String topic;
 
-    @Column(name = "grade_level", length = 64)
+    @Column("grade_level")
     private String gradeLevel;
 
-    @Column(name = "locale", length = 32)
+    @Column("locale")
     private String locale;
 
-    @Column(name = "title")
+    @Column("title")
     private String title;
 
-    @Column(name = "description")
+    @Column("description")
     private String description;
 
-    @Column(name = "nasa_source", columnDefinition = "JSONB")
+    @Column("nasa_source")
     private String nasaSource;
 
-    @Column(name = "content_json", columnDefinition = "JSONB")
+    @Column("content_json")
     private String contentJson;
 
-    @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @OrderBy("positionIndex ASC, id ASC")
+    @Transient
     private List<Slide> slides = new ArrayList<>();
 
-    @Column(name = "created_at", nullable = false)
+    @Column("created_at")
     private Instant createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column("updated_at")
     private Instant updatedAt;
 
-    @Column(name = "expires_at")
+    @Column("expires_at")
     private Instant expiresAt;
-
-    @PrePersist
-    public void onPersist() {
-        Instant now = Instant.now();
-        if (createdAt == null) {
-            createdAt = now;
-        }
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = Instant.now();
-    }
 }

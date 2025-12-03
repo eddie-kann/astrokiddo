@@ -10,12 +10,12 @@ import java.time.Instant;
 
 public interface DeckService {
     Mono<LessonDeck> findOrGenerate(GenerateDeckRequestDto request);
-    LessonDeck getById(Long id);
-    Page<LessonDeck> listDecks(String topic,
-                               String gradeLevel,
-                               String locale,
-                               String nasaSource,
-                               Instant createdAfter,
-                               Instant createdBefore,
-                               Pageable pageable);
+    Mono<LessonDeck> getById(Long id);
+    Mono<Page<LessonDeck>> listDecks(String topic,
+                                     String gradeLevel,
+                                     String locale,
+                                     String nasaSource,
+                                     Instant createdAfter,
+                                     Instant createdBefore,
+                                     Pageable pageable);
 }

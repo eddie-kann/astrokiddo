@@ -3,9 +3,9 @@ package com.astrokiddo.controller;
 import com.astrokiddo.dto.ApodResponseDto;
 import com.astrokiddo.service.ApodService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -40,7 +40,18 @@ public class ApodController {
     }
 
     @GetMapping("/history")
-    public Mono<Page<ApodResponseDto>> getApodHistory(@PageableDefault(sort = "apodDate", size = 20, direction = Sort.Direction.DESC) Pageable pageable) {
+    public Mono<Page<ApodResponseDto>> getApodHistory(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "sort", defaultValue = "apodDate,desc") String sort
+    ) {
+        String[] parts = sort.split(",");
+        String property = parts[0];
+        Sort.Direction direction = parts.length > 1
+                ? Sort.Direction.fromString(parts[1])
+                : Sort.Direction.ASC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, property));
         return apodService.listApods(pageable);
     }
 }

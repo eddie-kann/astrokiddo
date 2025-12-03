@@ -2,16 +2,8 @@ package com.astrokiddo.entity.deck;
 
 import com.astrokiddo.entity.BaseEntity;
 import com.astrokiddo.model.SlideType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,61 +13,44 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "slides")
+@Table("slides")
 public class Slide extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "deck_id", nullable = false)
-    private Deck deck;
+    @Column("deck_id")
+    private Long deckId;
 
-    @Column(name = "slide_uuid", nullable = false, unique = true)
+    @Column("slide_uuid")
     private UUID slideUuid;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", length = 64)
+    @Column("type")
     private SlideType type;
 
-    @Column(name = "title")
+    @Column("title")
     private String title;
 
-    @Column(name = "text", columnDefinition = "TEXT")
+    @Column("text")
     private String text;
 
-    @Column(name = "image_url", length = 1024)
+    @Column("image_url")
     private String imageUrl;
 
-    @Column(name = "attribution")
+    @Column("attribution")
     private String attribution;
 
-    @Column(name = "position_index")
+    @Column("position_index")
     private Integer positionIndex;
 
-    @Column(name = "tts_audio_url", length = 1024)
+    @Column("tts_audio_url")
     private String ttsAudioUrl;
 
-    @Column(name = "tts_text_hash")
+    @Column("tts_text_hash")
     private String ttsTextHash;
 
-    @Column(name = "created_at", nullable = false)
+    @Column("created_at")
     private Instant createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @Column("updated_at")
     private Instant updatedAt;
-
-    @PrePersist
-    public void onPersist() {
-        Instant now = Instant.now();
-        if (createdAt == null) {
-            createdAt = now;
-        }
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = Instant.now();
-    }
 
     @Override
     public boolean equals(Object o) {

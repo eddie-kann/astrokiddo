@@ -4,17 +4,18 @@ import com.astrokiddo.dto.GenerateDeckRequestDto;
 import com.astrokiddo.entity.deck.Deck;
 import com.astrokiddo.entity.deck.Slide;
 import com.astrokiddo.model.LessonDeck;
-import com.astrokiddo.service.DeckService;
+import com.astrokiddo.repository.deck.SlideRepository;
 import com.astrokiddo.service.DeckCrudService;
+import com.astrokiddo.service.DeckService;
 import com.astrokiddo.service.LessonGeneratorService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -28,62 +29,49 @@ public class DefaultDeckServiceImpl implements DeckService {
     private final DeckCrudService defaultDeckCrudService;
     private final LessonGeneratorService lessonGeneratorService;
     private final ObjectMapper objectMapper;
+    private final SlideRepository slideRepository;
 
     public DefaultDeckServiceImpl(DeckCrudService defaultDeckCrudService,
                                   LessonGeneratorService lessonGeneratorService,
-                                  ObjectMapper objectMapper) {
+                                  ObjectMapper objectMapper, SlideRepository slideRepository) {
         this.defaultDeckCrudService = defaultDeckCrudService;
         this.lessonGeneratorService = lessonGeneratorService;
         this.objectMapper = objectMapper;
+        this.slideRepository = slideRepository;
     }
 
+    @Override
     public Mono<LessonDeck> findOrGenerate(GenerateDeckRequestDto request) {
         String deckKey = computeDeckKey(request);
-        return Mono.defer(() -> Mono.justOrEmpty(fetchExisting(deckKey)))
-                .subscribeOn(Schedulers.boundedElastic())
+        return defaultDeckCrudService.findByDeckKey(deckKey)
                 .flatMap(deck -> {
                     if (!isExpired(deck)) {
-                        return Mono.just(toModel(deck));
+                        return toModelWithSlides(deck);
                     }
                     return regenerateAndSave(deck, request, deckKey);
                 })
                 .switchIfEmpty(regenerateAndSave(null, request, deckKey));
     }
 
-    public LessonDeck getById(Long id) {
-        Deck deck = defaultDeckCrudService.findById(id);
-        return toModel(deck);
+    @Override
+    public Mono<LessonDeck> getById(Long id) {
+        return defaultDeckCrudService.findById(id)
+                .flatMap(this::toModelWithSlides);
     }
 
-    public Page<LessonDeck> listDecks(String topic,
-                                      String gradeLevel,
-                                      String locale,
-                                      String nasaSource,
-                                      Instant createdAfter,
-                                      Instant createdBefore,
-                                      Pageable pageable) {
-        Specification<Deck> spec = (root, query, cb) -> cb.conjunction();
-
-        if (topic != null && !topic.isBlank()) {
-            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("topic")), "%" + topic.toLowerCase() + "%"));
-        }
-        if (gradeLevel != null && !gradeLevel.isBlank()) {
-            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("gradeLevel")), gradeLevel.toLowerCase()));
-        }
-        if (locale != null && !locale.isBlank()) {
-            spec = spec.and((root, query, cb) -> cb.equal(cb.lower(root.get("locale")), locale.toLowerCase()));
-        }
-        if (nasaSource != null && !nasaSource.isBlank()) {
-            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("nasaSource")), "%" + nasaSource.toLowerCase() + "%"));
-        }
-        if (createdAfter != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("createdAt"), createdAfter));
-        }
-        if (createdBefore != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("createdAt"), createdBefore));
-        }
-
-        return defaultDeckCrudService.findAll(spec, pageable).map(this::toModel);
+    @Override
+    public Mono<Page<LessonDeck>> listDecks(String topic,
+                                            String gradeLevel,
+                                            String locale,
+                                            String nasaSource,
+                                            Instant createdAfter,
+                                            Instant createdBefore,
+                                            Pageable pageable) {
+        return defaultDeckCrudService.findAll(topic, gradeLevel, locale, nasaSource, createdAfter, createdBefore, pageable)
+                .flatMap(page -> Flux.fromIterable(page.getContent())
+                        .concatMap(this::toModelWithSlides)
+                        .collectList()
+                        .map(models -> new PageImpl<>(models, pageable, page.getTotalElements())));
     }
 
     private String computeDeckKey(GenerateDeckRequestDto request) {
@@ -94,10 +82,6 @@ public class DefaultDeckServiceImpl implements DeckService {
                 .toLowerCase();
     }
 
-    private Optional<Deck> fetchExisting(String deckKey) {
-        return defaultDeckCrudService.findByDeckKey(deckKey);
-    }
-
     private boolean isExpired(Deck deck) {
         Instant expiresAt = deck.getExpiresAt();
         return expiresAt == null || expiresAt.isBefore(Instant.now());
@@ -105,11 +89,10 @@ public class DefaultDeckServiceImpl implements DeckService {
 
     private Mono<LessonDeck> regenerateAndSave(Deck existing, GenerateDeckRequestDto request, String deckKey) {
         return lessonGeneratorService.generate(request)
-                .flatMap(deckModel -> Mono.fromCallable(() -> saveDeck(existing, deckModel, request, deckKey))
-                        .subscribeOn(Schedulers.boundedElastic()));
+                .flatMap(deckModel -> saveDeck(existing, deckModel, request, deckKey));
     }
 
-    protected LessonDeck saveDeck(Deck entity, LessonDeck model, GenerateDeckRequestDto request, String deckKey) {
+    protected Mono<LessonDeck> saveDeck(Deck entity, LessonDeck model, GenerateDeckRequestDto request, String deckKey) {
         Deck deck = entity != null ? entity : new Deck();
         Instant now = Instant.now();
         deck.setDeckKey(deckKey);
@@ -121,11 +104,6 @@ public class DefaultDeckServiceImpl implements DeckService {
         deck.setNasaSource(toJson(buildNasaSource(request)));
         model.setGradeLevel(normalizeNullable(request.getGradeLevel()));
         model.setLocale(normalizeNullable(request.getLocale()));
-        if (deck.getSlides() == null) {
-            deck.setSlides(new ArrayList<>());
-        }
-        deck.getSlides().clear();
-        deck.getSlides().addAll(buildSlides(deck, model));
         deck.setContentJson(toJson(copyWithoutSlides(model)));
         if (deck.getCreatedAt() == null) {
             deck.setCreatedAt(now);
@@ -133,11 +111,21 @@ public class DefaultDeckServiceImpl implements DeckService {
         deck.setUpdatedAt(now);
         deck.setExpiresAt(now.plus(VALIDITY));
 
-        Deck saved = defaultDeckCrudService.saveOrUpdate(deck);
+        return defaultDeckCrudService.saveOrUpdate(deck)
+                .flatMap(saved -> persistSlides(saved, model)
+                        .doOnNext(saved::setSlides)
+                        .thenReturn(saved))
+                .flatMap(saved -> {
+                    syncModelFromEntity(saved, model);
+                    return Mono.just(model);
+                });
+    }
 
-        syncModelFromEntity(saved, model);
-
-        return model;
+    private Mono<List<Slide>> persistSlides(Deck deck, LessonDeck model) {
+        List<Slide> slides = buildSlides(deck.getId(), model);
+        return slideRepository.deleteByDeckId(deck.getId())
+                .thenMany(slideRepository.saveAll(slides))
+                .collectList();
     }
 
     private Map<String, Object> buildNasaSource(GenerateDeckRequestDto request) {
@@ -147,6 +135,15 @@ public class DefaultDeckServiceImpl implements DeckService {
         source.put("locale", normalizeNullable(request.getLocale()));
         source.put("source", "NASA images + AI enrichment");
         return source;
+    }
+
+    private Mono<LessonDeck> toModelWithSlides(Deck deck) {
+        return slideRepository.findByDeckIdOrderByPositionIndexAsc(deck.getId())
+                .collectList()
+                .map(slides -> {
+                    deck.setSlides(slides);
+                    return toModel(deck);
+                });
     }
 
     private LessonDeck toModel(Deck deck) {
@@ -172,12 +169,6 @@ public class DefaultDeckServiceImpl implements DeckService {
                         }
                     });
                     model.setSlides(stored.getSlides());
-                    if (deck.getSlides() == null) {
-                        deck.setSlides(new ArrayList<>());
-                    }
-                    deck.getSlides().clear();
-                    deck.getSlides().addAll(buildSlides(deck, model));
-                    defaultDeckCrudService.saveOrUpdate(deck);
                 }
             } catch (JsonProcessingException e) {
                 throw new IllegalStateException("Failed to parse deck JSON for id " + deck.getId(), e);
@@ -218,13 +209,13 @@ public class DefaultDeckServiceImpl implements DeckService {
         }
     }
 
-    private List<Slide> buildSlides(Deck deck, LessonDeck model) {
+    private List<Slide> buildSlides(Long deckId, LessonDeck model) {
         List<Slide> slides = new ArrayList<>();
         List<com.astrokiddo.model.Slide> slideModels = model.getSlides() != null ? model.getSlides() : List.of();
         for (int i = 0; i < slideModels.size(); i++) {
             com.astrokiddo.model.Slide slideModel = slideModels.get(i);
             Slide slide = new Slide();
-            slide.setDeck(deck);
+            slide.setDeckId(deckId);
             slide.setSlideUuid(slideModel.getSlideUuid() != null ? slideModel.getSlideUuid() : UUID.randomUUID());
             slide.setType(slideModel.getType());
             slide.setTitle(slideModel.getTitle());
@@ -233,6 +224,8 @@ public class DefaultDeckServiceImpl implements DeckService {
             slide.setAttribution(slideModel.getAttribution());
             slide.setTtsAudioUrl(slideModel.getTtsAudioUrl());
             slide.setPositionIndex(i);
+            slide.setCreatedAt(Instant.now());
+            slide.setUpdatedAt(Instant.now());
             slides.add(slide);
         }
         return slides;

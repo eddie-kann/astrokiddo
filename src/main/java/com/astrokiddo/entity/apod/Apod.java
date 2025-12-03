@@ -1,9 +1,8 @@
 package com.astrokiddo.entity.apod;
 
 import com.astrokiddo.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,37 +10,36 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "apods")
+@Table("apods")
 public class Apod extends BaseEntity {
 
-    @Column(name = "apod_date", nullable = false, unique = true)
+    @Column("apod_date")
     private LocalDate apodDate;
 
-    @Column(name = "title")
+    @Column("title")
     private String title;
 
-    @Column(name = "explanation", columnDefinition = "TEXT")
+    @Column("explanation")
     private String explanation;
 
-    @Column(name = "media_type", length = 64)
+    @Column("media_type")
     private String mediaType;
 
-    @Column(name = "url", length = 1024)
+    @Column("url")
     private String url;
 
-    @Column(name = "hdurl", length = 1024)
+    @Column("hdurl")
     private String hdUrl;
 
-    @Column(name = "thumbnail_url", length = 1024)
+    @Column("thumbnail_url")
     private String thumbnailUrl;
 
-    @Column(name = "copyright")
+    @Column("copyright")
     private String copyright;
 
-    @Column(name = "service_version", length = 64)
+    @Column("service_version")
     private String serviceVersion;
 
-    @Column(name = "tts_audio_url", length = 1024)
+    @Column("tts_audio_url")
     private String ttsAudioUrl;
 }

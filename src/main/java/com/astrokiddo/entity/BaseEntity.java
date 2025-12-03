@@ -1,33 +1,22 @@
 package com.astrokiddo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 @Getter
 @Setter
-@MappedSuperclass
 public abstract class BaseEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     protected Long id;
 
     @Transient
-    private String className;
-
-    public BaseEntity() {
-        className = getClass().getSimpleName();
-    }
-
-    public BaseEntity(Long id) {
-        this();
-        this.id = id;
-    }
+    private String className = getClass().getSimpleName();
 
     public static boolean equals(BaseEntity e1, BaseEntity e2) {
         if ((null != e1 && null == e2) || (null != e2 && null == e1)) {

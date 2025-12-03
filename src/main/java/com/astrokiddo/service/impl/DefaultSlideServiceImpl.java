@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -22,40 +23,34 @@ public class DefaultSlideServiceImpl implements SlideService {
     private final R2StorageService r2StorageService;
     private final SlideRepository slideRepository;
 
-    public DefaultSlideServiceImpl(CloudflareTtsClient cloudflareTtsClient,
-                                   R2StorageService r2StorageService,
-                                   SlideRepository slideRepository) {
+    public DefaultSlideServiceImpl(CloudflareTtsClient cloudflareTtsClient, R2StorageService r2StorageService, SlideRepository slideRepository) {
         this.cloudflareTtsClient = cloudflareTtsClient;
         this.r2StorageService = r2StorageService;
         this.slideRepository = slideRepository;
     }
 
     @Override
-    public Slide getSlideByUuid(UUID slideUuid) {
-        return slideRepository.findBySlideUuid(slideUuid)
-                .orElseThrow(() -> new NoSuchElementException("Slide not found: " + slideUuid));
+    public Mono<Slide> getSlideByUuid(UUID slideUuid) {
+        return slideRepository.findBySlideUuid(slideUuid).switchIfEmpty(Mono.error(new NoSuchElementException("Slide not found: " + slideUuid)));
     }
 
     @Override
     public Mono<String> generateOrGetAudioForSlide(UUID slideUuid, String speaker) {
-        return Mono.fromCallable(() -> getSlideByUuid(slideUuid))
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(slide -> {
-                    String hash = computeHash(slide.getText(), speaker);
-                    if (StringUtils.hasText(slide.getTtsAudioUrl()) && hash.equals(slide.getTtsTextHash())) {
-                        return Mono.just(slide.getTtsAudioUrl());
-                    }
+        return getSlideByUuid(slideUuid).flatMap(slide -> {
+            String hash = computeHash(slide.getText(), speaker);
+            if (StringUtils.hasText(slide.getTtsAudioUrl()) && hash.equals(slide.getTtsTextHash())) {
+                return Mono.just(slide.getTtsAudioUrl());
+            }
 
-                    return cloudflareTtsClient.synthesize(slide.getText(), speaker)
-                            .flatMap(audio -> Mono.fromCallable(() -> {
-                                String key = "tts/slides/" + slideUuid + "-" + UUID.randomUUID() + ".mp3";
-                                String audioUrl = r2StorageService.saveAudio(key, audio);
-                                slide.setTtsAudioUrl(audioUrl);
-                                slide.setTtsTextHash(hash);
-                                slideRepository.save(slide);
-                                return audioUrl;
-                            }).subscribeOn(Schedulers.boundedElastic()));
-                });
+            return cloudflareTtsClient.synthesize(slide.getText(), speaker).flatMap(audio -> Mono.fromCallable(() -> {
+                String key = "tts/slides/" + slideUuid + "-" + UUID.randomUUID() + ".mp3";
+                String audioUrl = r2StorageService.saveAudio(key, audio);
+                slide.setTtsAudioUrl(audioUrl);
+                slide.setTtsTextHash(hash);
+                slide.setUpdatedAt(Instant.now());
+                return slide;
+            }).subscribeOn(Schedulers.boundedElastic()).flatMap(slideRepository::save).thenReturn(slide.getTtsAudioUrl()));
+        });
     }
 
     private String computeHash(String text, String speaker) {

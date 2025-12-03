@@ -34,25 +34,22 @@ public class DeckController {
     }
 
     @GetMapping
-    public Page<LessonDeck> listDecks(@RequestParam(required = false) String topic,
-                                      @RequestParam(required = false) String gradeLevel,
-                                      @RequestParam(required = false) String locale,
-                                      @RequestParam(required = false) String nasaSource,
-                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdAfter,
-                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdBefore,
-                                      @PageableDefault Pageable pageable) {
+    public Mono<Page<LessonDeck>> listDecks(@RequestParam(required = false) String topic,
+                                            @RequestParam(required = false) String gradeLevel,
+                                            @RequestParam(required = false) String locale,
+                                            @RequestParam(required = false) String nasaSource,
+                                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdAfter,
+                                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdBefore,
+                                            @PageableDefault Pageable pageable) {
         return deckService.listDecks(topic, gradeLevel, locale, nasaSource, createdAfter, createdBefore, pageable);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LessonDeck> get(@PathVariable Long id) {
-        try {
-            LessonDeck deck = deckService.getById(id);
-            return ResponseEntity.ok()
-                    .cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES).cachePublic())
-                    .body(deck);
-        } catch (NoSuchElementException ex) {
-            return ResponseEntity.notFound().build();
-        }
+    public Mono<ResponseEntity<LessonDeck>> get(@PathVariable Long id) {
+        return deckService.getById(id)
+                .map(deck -> ResponseEntity.ok()
+                        .cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES).cachePublic())
+                        .body(deck))
+                .onErrorResume(NoSuchElementException.class, ex -> Mono.just(ResponseEntity.notFound().build()));
     }
 }
