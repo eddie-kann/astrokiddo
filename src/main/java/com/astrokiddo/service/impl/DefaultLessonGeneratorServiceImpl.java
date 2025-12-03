@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class DefaultLessonGeneratorServiceImpl implements LessonGeneratorService {
@@ -76,7 +77,13 @@ public class DefaultLessonGeneratorServiceImpl implements LessonGeneratorService
         slides.add(question);
         slides.add(further);
 
-        slides.forEach(deck::addSlide);
+        slides.forEach(s -> {
+            if (s.getSlideUuid() == null) {
+                s.setSlideUuid(UUID.randomUUID());
+            }
+            deck.addSlide(s);
+        });
+
         if (enrichment != null && enrichment.isMeaningful()) {
             deck.setEnrichment(enrichment);
         }

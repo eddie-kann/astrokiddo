@@ -85,7 +85,6 @@ public class WebClientConfig {
                         .codecs(c -> c.defaultCodecs().maxInMemorySize(8 * 1024 * 1024))
                         .build())
                 .filter(logRequest())
-                .filter(logResponse())
                 .build();
     }
 
@@ -93,13 +92,6 @@ public class WebClientConfig {
         return ExchangeFilterFunction.ofRequestProcessor(request -> {
             log.info("WebClient Request: {} {}", request.method(), request.url());
             return Mono.just(request);
-        });
-    }
-
-    private ExchangeFilterFunction logResponse() {
-        return ExchangeFilterFunction.ofResponseProcessor(response -> {
-            log.info("WebClient Response: {}", response.statusCode());
-            return Mono.just(response);
         });
     }
 }
