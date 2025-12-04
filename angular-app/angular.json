@@ -17,6 +17,7 @@
             "polyfills": [
               "zone.js"
             ],
+            "baseHref": "/",
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
