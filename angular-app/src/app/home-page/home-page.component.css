@@ -1,32 +1,18 @@
-.waveform {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(3px, 6px));
-  align-items: end;
-  gap: 4px;
-  height: 60px;
-  padding: 8px;
-  background: rgba(10, 18, 36, 0.6);
-  border-radius: 14px;
+.audio-player {
+  background: linear-gradient(135deg, rgba(106, 169, 255, 0.12), rgba(10, 16, 32, 0.65));
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
 }
 
-.waveform span {
+#audio-player #waveform,
+#waveform {
   width: 100%;
-  height: 30px;
-  background: linear-gradient(180deg, #6aa9ff, #4a7bd1);
+}
+
+#audio-player canvas,
+#waveform canvas {
   border-radius: 10px;
-  animation: pulse 1.6s ease-in-out infinite;
-  transform-origin: center bottom;
-}
-
-.waveform.waveform-paused span {
-  animation-play-state: paused;
-  opacity: 0.4;
-}
-
-@keyframes pulse {
-  0% { transform: scaleY(0.4); opacity: 0.5; }
-  50% { transform: scaleY(1); opacity: 1; }
-  100% { transform: scaleY(0.4); opacity: 0.5; }
+  height: 60px !important;
 }

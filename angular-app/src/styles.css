@@ -33,6 +33,44 @@
 @layer base {
   :root {
     color-scheme: dark;
+    --cosmic-surface: #0b1020;
+    --cosmic-surface-2: #12182b;
+    --cosmic-text: #e5e7eb;
+    --cosmic-muted: #9ca3af;
+    --cosmic-accent: #6aa9ff;
+  }
+
+  body {
+    background: #05060a;
+    color: var(--cosmic-text);
+    font-family: 'Inter', 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .bg-cosmic-surface {
+    background-color: var(--cosmic-surface);
+  }
+
+  .text-cosmic-text {
+    color: var(--cosmic-text);
+  }
+
+  .text-cosmic-muted {
+    color: var(--cosmic-muted);
+  }
+
+  .bg-cosmic-accent {
+    background-color: var(--cosmic-accent);
+  }
+
+  .border-cosmic-accent {
+    border-color: var(--cosmic-accent);
+  }
+
+  .shadow-cosmic-glow {
+    box-shadow: 0 10px 35px rgba(106, 169, 255, 0.35);
   }
 
 }

@@ -1,5 +1,13 @@
-<nz-layout class="min-h-screen bg-transparent">
-  <nz-header class="sticky top-0 z-50 backdrop-blur bg-cosmic-surface/80 border-b border-white/10">
+<div class="cosmic-background"></div>
+@if (loading$ | async) {
+  <div class="fixed inset-0 z-[999] bg-black/70 backdrop-blur flex flex-col items-center justify-center text-white gap-3">
+    <div class="text-6xl animate-bounce drop-shadow-lg">🚀</div>
+    <div class="text-lg font-semibold text-cosmic-accent tracking-wide">Launching your cosmic content...</div>
+    <div class="text-sm text-cosmic-muted">Hang tight while we fetch data from NASA.</div>
+  </div>
+}
+<nz-layout class="min-h-screen bg-transparent relative">
+  <nz-header class="sticky top-0 z-50 backdrop-blur bg-cosmic-surface/80 border-b border-white/10 shadow-cosmic-glow">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-4 py-3 px-3 md:px-4">
       <a routerLink="/home" class="flex items-center gap-3 text-white font-semibold text-xl tracking-tight">
         <span class="h-3 w-3 rounded-full bg-cosmic-accent shadow-cosmic-glow"></span>
@@ -43,7 +51,7 @@
     </div>
   </nz-header>
 
-  <nz-content>
+  <nz-content class="relative text-cosmic-text">
     <main class="max-w-6xl mx-auto px-3 md:px-4 py-8">
       <router-outlet></router-outlet>
     </main>

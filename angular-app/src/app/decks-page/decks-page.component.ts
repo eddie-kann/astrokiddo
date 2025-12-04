@@ -14,6 +14,7 @@ import {NzModalModule} from 'ng-zorro-antd/modal';
 import {NzTagModule} from 'ng-zorro-antd/tag';
 import {NzImageModule} from 'ng-zorro-antd/image';
 import {firstValueFrom} from 'rxjs';
+import {LoadingService} from '../loading.service';
 
 @Component({
   selector: 'app-decks-page',
@@ -54,11 +55,11 @@ export class DecksPageComponent implements OnInit, OnDestroy {
   private revealInstance?: any;
   private revealInitTimeout?: number;
 
-  constructor(private deckSvc: DeckService) {
+  constructor(private deckSvc: DeckService, private loadingSvc: LoadingService) {
   }
 
   ngOnInit() {
-    this.fetchDecks();
+    void this.fetchDecks();
   }
 
   ngOnDestroy() {
@@ -70,12 +71,14 @@ export class DecksPageComponent implements OnInit, OnDestroy {
 
   async fetchDecks() {
     this.listLoading = true;
+    this.loadingSvc.show();
     try {
       this.decks = await firstValueFrom(this.deckSvc.listDecks());
     } catch (e) {
       console.warn('Unable to load decks', e);
     } finally {
       this.listLoading = false;
+      this.loadingSvc.hide();
     }
   }
 
@@ -85,6 +88,7 @@ export class DecksPageComponent implements OnInit, OnDestroy {
       return;
     }
     this.loading = true;
+    this.loadingSvc.show();
     this.error = undefined;
     const req = this.form.getRawValue() as GenerateReq;
     this.lastRequest = req;
@@ -95,6 +99,7 @@ export class DecksPageComponent implements OnInit, OnDestroy {
       this.error = e?.message || 'Failed to generate deck';
     } finally {
       this.loading = false;
+      this.loadingSvc.hide();
     }
   }
 
