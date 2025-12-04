@@ -1,35 +1,38 @@
-@import 'ng-zorro-antd/ng-zorro-antd.min.css';
+@import 'tailwindcss';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility glass-panel {
+  @apply backdrop-blur-sm rounded-2xl border border-white/10;
+}
+
+@utility panel-heading {
+  @apply text-xl font-semibold text-white mb-3 flex items-center gap-2;
+}
+
+@utility section-title {
+  @apply text-2xl font-semibold text-white mb-4;
+}
 
 @layer base {
   :root {
     color-scheme: dark;
   }
 
-  body {
-    @apply bg-cosmic-dark text-cosmic-text min-h-screen antialiased;
-    background-image: theme('backgroundImage.stars');
-    background-attachment: fixed;
-  }
-
-  a {
-    @apply text-cosmic-accent hover:text-white transition-colors duration-200;
-  }
-}
-
-@layer components {
-  .glass-panel {
-    @apply bg-cosmic-surface/80 backdrop-blur rounded-2xl border border-white/10 shadow-cosmic-glow;
-  }
-
-  .panel-heading {
-    @apply text-xl font-semibold text-white mb-3 flex items-center gap-2;
-  }
-
-  .section-title {
-    @apply text-2xl font-semibold text-white mb-4;
-  }
 }
