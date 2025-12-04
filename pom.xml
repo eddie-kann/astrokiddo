@@ -93,6 +93,11 @@
           <artifactId>r2dbc-postgresql</artifactId>
       </dependency>
       <dependency>
+          <groupId>org.springdoc</groupId>
+          <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+          <version>${springdoc.version}</version>
+      </dependency>
+      <dependency>
           <groupId>software.amazon.awssdk</groupId>
           <artifactId>s3</artifactId>
       </dependency>
@@ -104,13 +109,6 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.springdoc</groupId>
-                    <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
-                    <version>${springdoc.version}</version>
-                </dependency>
-            </dependencies>
         </profile>
         <profile>
             <id>prod</id>

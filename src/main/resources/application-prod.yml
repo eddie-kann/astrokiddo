@@ -42,3 +42,8 @@ logging:
   level:
     root: INFO
     com.astrokiddo: INFO
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
