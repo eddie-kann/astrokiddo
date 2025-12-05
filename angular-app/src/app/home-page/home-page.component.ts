@@ -12,11 +12,12 @@ import {firstValueFrom} from 'rxjs';
 import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
 import WaveSurfer from '../vendor/wavesurfer.js';
 import {LoadingService} from '../loading.service';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, NzCardModule, NzDatePickerModule, NzImageModule, NzButtonModule, NzIconModule, NzSpinModule, NzImageViewComponent],
+  imports: [CommonModule, FormsModule, NzCardModule, NzDatePickerModule, NzImageModule, NzButtonModule, NzIconModule, NzSpinModule, NzImageViewComponent, RouterLink],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css'
 })

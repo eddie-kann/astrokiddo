@@ -1,24 +1,92 @@
-<div class="grid gap-6">
-  <div class="glass-panel p-6 flex flex-col gap-4">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <div class="text-sm uppercase tracking-widest text-cosmic-muted">Astronomy Picture of the Day</div>
-        <h1 class="text-3xl font-semibold text-white mt-1">Explore the cosmos, one day at a time</h1>
-        <p class="text-cosmic-muted mt-2 max-w-2xl">Choose a date to see NASA's featured image or video, zoom into the
-        photo, and listen to narration when available.</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <i nz-icon nzType="calendar" nzTheme="outline" class="text-cosmic-accent"></i>
-        <nz-date-picker
-          [nzAllowClear]="true"
-          [nzInputReadOnly]="true"
-          [ngModel]="selectedDate"
-          (ngModelChange)="onDateChange($event)"
-          nzPlaceHolder="Pick a date"
-          class="w-52">
-        </nz-date-picker>
-      </div>
+<div class="space-y-10">
+  <section class="relative overflow-hidden rounded-[28px] border border-white/10 bg-space-mid/60 p-6 md:p-10 shadow-cosmic">
+    <div class="absolute inset-0 opacity-40" aria-hidden="true">
+      <div class="cosmic-grid-lines w-full h-full"></div>
     </div>
+    <div class="relative grid md:grid-cols-2 gap-8 items-center">
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-cosmic-muted">
+          Astronomy Picture of the Day
+        </div>
+        <h1 class="text-4xl md:text-5xl font-semibold text-white leading-tight">
+          Explore the cosmos, one day at a time
+        </h1>
+        <p class="text-cosmic-muted text-lg max-w-2xl">
+          Choose a date to see NASA's featured image or video, zoom in to every pixel, and listen to narration whenever it's available.
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a routerLink="/decks">
+            <button nz-button nzType="primary" nzShape="round" class="bg-cosmic-accent text-black font-semibold border-none shadow-cosmic-strong">
+              <i nz-icon nzType="appstore"></i>
+              Lesson Decks
+            </button>
+          </a>
+          <a routerLink="/about">
+            <button nz-button nzShape="round" nzType="default" class="border-white/20 bg-white/10 text-white">
+              <i nz-icon nzType="info-circle"></i>
+              About the mission
+            </button>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-cosmic-muted">
+          <div class="flex items-center gap-2">
+            <span class="h-10 w-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10">
+              <i nz-icon nzType="calendar" nzTheme="outline" class="text-cosmic-accent"></i>
+            </span>
+            <div>
+              <div class="text-white font-semibold">Daily data pipeline</div>
+              <div>Fresh content sourced from NASA's APOD feed.</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="h-10 w-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10">
+              <i nz-icon nzType="audio" nzTheme="outline" class="text-cosmic-accent"></i>
+            </span>
+            <div>
+              <div class="text-white font-semibold">Narrated journeys</div>
+              <div>Listen to AI-powered voiceovers when available.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <nz-card class="glass-panel shadow-cosmic-strong" [nzBodyStyle]="{ padding: '24px' }">
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-xs uppercase tracking-wide text-cosmic-muted">Choose your launch date</div>
+              <div class="text-lg font-semibold text-white">Time travel through space imagery</div>
+            </div>
+            <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-white/10 text-xs text-cosmic-muted border border-white/10">Live from NASA</span>
+          </div>
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <i nz-icon nzType="calendar" nzTheme="outline" class="text-cosmic-accent"></i>
+              <nz-date-picker
+                [nzAllowClear]="true"
+                [nzInputReadOnly]="true"
+                [ngModel]="selectedDate"
+                (ngModelChange)="onDateChange($event)"
+                nzPlaceHolder="Pick a date"
+                class="w-full">
+              </nz-date-picker>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm text-cosmic-muted">
+              <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <div class="text-xs uppercase">Media</div>
+                <div class="text-white font-semibold">Images &amp; video</div>
+              </div>
+              <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
+                <div class="text-xs uppercase">Narration</div>
+                <div class="text-white font-semibold">Waveform preview</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+  </section>
+
+  <section class="space-y-4">
     <div class="relative">
       @if (loading) {
         <div class="absolute inset-0 flex items-center justify-center">
@@ -27,16 +95,16 @@
       }
       @if (!loading) {
         @if (apod) {
-          <nz-card class="glass-panel" [nzBodyStyle]="{padding: '24px'}">
-            <div class="flex flex-col gap-4">
+          <nz-card class="glass-panel" [nzBodyStyle]="{ padding: '24px' }">
+            <div class="flex flex-col gap-5">
               <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div class="text-sm text-cosmic-muted">{{ apod.date | date: 'longDate' }}</div>
-                  <div class="text-2xl font-semibold text-white">{{ apod.title || 'Astronomy Picture of the Day' }}</div>
+                  <div class="text-3xl font-semibold text-white">{{ apod.title || 'Astronomy Picture of the Day' }}</div>
                 </div>
                 @if (apod.ttsAudioUrl) {
                   <div class="flex flex-col gap-2 w-full md:w-auto">
-                    <div class="flex items-center justify-center md:justify-end gap-2 bg-black/40 border border-white/5 rounded-xl px-3 py-2 shadow-cosmic-glow">
+                    <div class="flex items-center justify-center md:justify-end gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-2 shadow-cosmic">
                       <button
                         nz-button
                         nzShape="round"
@@ -48,18 +116,18 @@
                       </button>
                       <div class="text-xs text-cosmic-muted hidden md:block">Waveform preview</div>
                     </div>
-                    <div class="audio-player flex items-center justify-center">
-                      <div id="waveform" #waveformContainer class="w-full md:w-[560px] h-16"></div>
+                    <div class="cosmic-audio flex items-center justify-center">
+                      <div id="waveform" #waveformContainer class="cosmic-waveform w-full md:w-[560px]"></div>
                     </div>
-                    <button nz-button nzShape="round" nzType="default" class="bg-white/5" (click)="toggleAudio()">
+                    <button nz-button nzShape="round" nzType="default" class="bg-white/5 border-white/10 text-white" (click)="toggleAudio()">
                       <i nz-icon [nzType]="playing ? 'pause' : 'audio'" nzTheme="outline"></i>
                       <span class="ml-1">{{ playing ? 'Pause' : 'Play' }} narration</span>
                     </button>
                   </div>
                 }
               </div>
-              <div class="grid md:grid-cols-2 gap-4 items-start">
-                <div class="bg-black/40 rounded-xl overflow-hidden border border-white/5 shadow-cosmic-glow">
+              <div class="grid lg:grid-cols-3 gap-4 items-start">
+                <div class="lg:col-span-2 bg-black/50 rounded-2xl overflow-hidden border border-white/10 shadow-cosmic-strong">
                   @if (mediaIsImage) {
                     <nz-image-group>
                       <div class="relative">
@@ -95,12 +163,12 @@
                     </div>
                   }
                 </div>
-                <div class="glass-panel p-4 h-full overflow-y-auto space-y-4">
+                <div class="glass-panel p-4 h-full space-y-4">
                   <div class="text-sm text-cosmic-muted">Explanation</div>
                   <p class="leading-relaxed text-gray-200 whitespace-pre-line">{{ apod.explanation }}</p>
-                  <div class="flex items-center justify-between text-xs text-cosmic-muted">
+                  <div class="flex flex-wrap items-center justify-between text-xs text-cosmic-muted gap-2">
                     @if (apod.media_type && !mediaIsImage && apod.url) {
-                      <span>
+                      <span class="flex items-center gap-1">
                         <i nz-icon nzType="play-circle"></i> Media type: {{ apod.media_type | titlecase }}
                       </span>
                     }
@@ -118,5 +186,5 @@
         }
       }
     </div>
-  </div>
+  </section>
 </div>
