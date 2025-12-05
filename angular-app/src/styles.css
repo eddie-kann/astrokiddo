@@ -27,6 +27,7 @@
     --cosmic-muted: #a1a9b8;
     --cosmic-accent: #7c3aed;
     --cosmic-secondary: #22d3ee;
+    --cosmic-card: rgba(12, 18, 38, 0.68);
     --cosmic-gradient: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.16), transparent 32%), radial-gradient(circle at 80% 8%, rgba(34, 211, 238, 0.12), transparent 30%), radial-gradient(circle at 50% 80%, rgba(251, 191, 36, 0.08), transparent 38%), linear-gradient(145deg, #0b1020, #05060a 55%, #0a0f1d 90%);
     --cosmic-aurora: radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.24), transparent 28%), radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.22), transparent 30%);
   }
@@ -141,25 +142,7 @@
 }
 
 @layer components {
-  .ant-layout,
-  .ant-layout-content,
-  .ant-layout-footer {
-    background: transparent;
-  }
 
-  .ant-layout-header {
-    background: rgba(9, 12, 26, 0.6);
-  }
-
-  .ant-card.glass-panel {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
-  }
-
-  .ant-card.glass-panel .ant-card-body {
-    background: transparent;
-  }
 
   .cosmic-audio {
     background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(34, 211, 238, 0.12));
@@ -180,6 +163,18 @@
 .ant-layout-footer,
 .ant-layout-header {
   background: transparent !important;
+}
+
+.ant-layout-header {
+  background: rgba(9, 12, 26, 0.6);
+}
+
+.ant-card.glass-panel {
+  background: var(--cosmic-card);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  color: var(--cosmic-text);
+  backdrop-filter: blur(18px);
 }
 
 @keyframes star-twinkle {

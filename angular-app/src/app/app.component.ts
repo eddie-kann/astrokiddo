@@ -26,7 +26,7 @@ export class AppComponent {
   externalLinks = [
     {label: 'NASA', href: 'https://apod.nasa.gov/apod/astropix.html', icon: 'rocket'},
     {label: 'University', href: 'https://www.nasa.gov/learning-resources/', icon: 'book'},
-    {label: 'GitHub', href: 'https://github.com/astrokiddo', icon: 'github'}
+    {label: 'GitHub', href: 'https://github.com/eddie-kann/astrokiddo', icon: 'github'}
   ];
 
   readonly loading$;
