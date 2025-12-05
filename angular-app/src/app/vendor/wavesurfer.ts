@@ -33,7 +33,7 @@ export default class WaveSurfer {
   load(url: string) {
     this.destroyAudio();
     this.audio = new Audio(url);
-    this.audio.crossOrigin = 'anonymous';
+    this.audio.crossOrigin = 'https://astrokiddo.com';
     this.audio.addEventListener('ended', () => this.emit('finish'));
     this.audio.addEventListener('pause', () => this.emit('pause'));
     this.audio.addEventListener('play', () => this.emit('play'));

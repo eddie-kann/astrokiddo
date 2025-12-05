@@ -131,6 +131,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   onZoomLeave() {
     this.zooming = false;
+    this.resetZoomOrigin();
+  }
+
+  onImagePreview() {
+    this.resetZoomOrigin();
   }
 
   private updateZoomOrigin(event: MouseEvent) {
@@ -142,5 +147,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
     this.zoomOrigin = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
+  }
+
+  private resetZoomOrigin() {
+    this.zoomOrigin = '50% 50%';
   }
 }
