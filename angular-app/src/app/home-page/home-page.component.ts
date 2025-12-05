@@ -29,6 +29,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   playing = false;
   private waveSurfer?: WaveSurfer;
   @ViewChild('waveformContainer') waveformContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('zoomFrame') zoomFrame?: ElementRef<HTMLDivElement>;
+  zooming = false;
+  zoomOrigin = '50% 50%';
 
   constructor(private deckSvc: DeckService, private loadingSvc: LoadingService) {
   }
@@ -72,7 +75,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   private setupAudio() {
     this.stopAudio();
-    if (this.apod?.ttsAudioUrl) {
+    if (this.apod?.tts_audio_url) {
       window.setTimeout(() => this.initializeWaveform(), 0);
     }
   }
@@ -99,7 +102,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   private initializeWaveform() {
-    if (!this.apod?.ttsAudioUrl || !this.waveformContainer) {
+    if (!this.apod?.tts_audio_url || !this.waveformContainer) {
       return;
     }
     this.waveSurfer?.destroy();
@@ -108,9 +111,45 @@ export class HomePageComponent implements OnInit, OnDestroy {
       waveColor: '#6aa9ff',
       progressColor: '#ffffff'
     });
-    this.waveSurfer.load(this.apod.ttsAudioUrl);
+    this.waveSurfer.load(this.apod.tts_audio_url);
     this.waveSurfer.on('play', () => this.playing = true);
     this.waveSurfer.on('pause', () => this.playing = false);
     this.waveSurfer.on('finish', () => this.playing = false);
+  }
+
+  onZoomEnter(event: MouseEvent) {
+    this.zooming = true;
+    this.updateZoomOrigin(event);
+  }
+
+  onZoomMove(event: MouseEvent) {
+    if (!this.zooming) {
+      return;
+    }
+    this.updateZoomOrigin(event);
+  }
+
+  onZoomLeave() {
+    this.zooming = false;
+    this.resetZoomOrigin();
+  }
+
+  onImagePreview() {
+    this.resetZoomOrigin();
+  }
+
+  private updateZoomOrigin(event: MouseEvent) {
+    const frame = this.zoomFrame?.nativeElement;
+    if (!frame) {
+      return;
+    }
+    const rect = frame.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    this.zoomOrigin = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
+  }
+
+  private resetZoomOrigin() {
+    this.zoomOrigin = '50% 50%';
   }
 }

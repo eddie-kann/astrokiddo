@@ -73,11 +73,11 @@
             <div class="grid grid-cols-2 gap-3 text-sm text-cosmic-muted">
               <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
                 <div class="text-xs uppercase">Media</div>
-                <div class="text-white font-semibold">Images &amp; video</div>
+                <div class="text-white font-semibold">Images &amp; from NASA</div>
               </div>
               <div class="p-3 rounded-2xl bg-white/5 border border-white/10">
                 <div class="text-xs uppercase">Narration</div>
-                <div class="text-white font-semibold">Waveform preview</div>
+                <div class="text-white font-semibold">AI voiceover</div>
               </div>
             </div>
           </div>
@@ -102,20 +102,8 @@
                   <div class="text-sm text-cosmic-muted">{{ apod.date | date: 'longDate' }}</div>
                   <div class="text-3xl font-semibold text-white">{{ apod.title || 'Astronomy Picture of the Day' }}</div>
                 </div>
-                @if (apod.ttsAudioUrl) {
+                @if (apod.tts_audio_url) {
                   <div class="flex flex-col gap-2 w-full md:w-auto">
-                    <div class="flex items-center justify-center md:justify-end gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-2 shadow-cosmic">
-                      <button
-                        nz-button
-                        nzShape="round"
-                        nzType="default"
-                        class="bg-cosmic-accent/20 border-cosmic-accent/50 text-white hover:bg-cosmic-accent/30"
-                        (click)="toggleAudio()">
-                        <i nz-icon [nzType]="playing ? 'pause-circle' : 'audio'" nzTheme="outline"></i>
-                        <span class="ml-1">{{ playing ? 'Pause' : 'Play' }} narration</span>
-                      </button>
-                      <div class="text-xs text-cosmic-muted hidden md:block">Waveform preview</div>
-                    </div>
                     <div class="cosmic-audio flex items-center justify-center">
                       <div id="waveform" #waveformContainer class="cosmic-waveform w-full md:w-[560px]"></div>
                     </div>
@@ -130,14 +118,22 @@
                 <div class="lg:col-span-2 bg-black/50 rounded-2xl overflow-hidden border border-white/10 shadow-cosmic-strong">
                   @if (mediaIsImage) {
                     <nz-image-group>
-                      <div class="relative">
+                      <div
+                        class="relative zoom-container"
+                        #zoomFrame
+                        [ngStyle]="{ '--zoom-origin': zoomOrigin }"
+                        (mousemove)="onZoomMove($event)"
+                        (mouseenter)="onZoomEnter($event)"
+                        (mouseleave)="onZoomLeave()">
                         <nz-image
-                          class="block w-full"
+                          class="block w-full transition-transform duration-300 ease-out"
                           [nzSrc]="apodImageSrc"
                           [nzAlt]="apod.title || 'Astronomy Picture of the Day'"
-                          nzDisablePreview="false">
+                          nzDisablePreview="false"
+                          [style.transform]="zooming ? 'scale(1.8)' : 'scale(1)'"
+                          [style.transform-origin]="zoomOrigin">
                         </nz-image>
-                        <div class="absolute bottom-3 right-3 text-xs bg-black/60 text-white px-3 py-1 rounded-full border border-white/10 shadow-lg">Click to zoom</div>
+                        <div class="absolute bottom-3 right-3 text-xs bg-black/60 text-white px-3 py-1 rounded-full border border-white/10 shadow-lg">Hover to zoom</div>
                       </div>
                     </nz-image-group>
                   } @else {

@@ -166,6 +166,9 @@
 }
 
 .ant-layout-header {
+  height: auto !important;
+  line-height: normal !important;
+  padding: 0 !important;
   background: rgba(9, 12, 26, 0.6);
 }
 

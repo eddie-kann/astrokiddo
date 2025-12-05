@@ -74,8 +74,8 @@ public class WebClientConfig {
                 .followRedirect(true)
                 .doOnConnected(conn -> conn
                         .addHandlerLast(new ReadTimeoutHandler(60))
-                        .addHandlerLast(new WriteTimeoutHandler(60)))
-                .wiretap("com.astrokiddo.webclient", LogLevel.INFO, AdvancedByteBufFormat.TEXTUAL);
+                        .addHandlerLast(new WriteTimeoutHandler(60))
+                );
 
         return WebClient.builder()
                 .baseUrl(baseUrl)
