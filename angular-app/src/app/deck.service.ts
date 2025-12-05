@@ -44,6 +44,16 @@ export interface GenerateReq {
   locale?: string;
 }
 
+export interface PageResponse<T> {
+  content: T[];
+  totalElements?: number;
+  totalPages?: number;
+  size?: number;
+  number?: number;
+  first?: boolean;
+  last?: boolean;
+}
+
 export interface ApodResponse {
   date?: string;
   title?: string;
@@ -66,8 +76,8 @@ export class DeckService {
     return this.http.post<LessonDeck>('/api/decks/generate', req);
   }
 
-  listDecks(): Observable<LessonDeck[]> {
-    return this.http.get<LessonDeck[]>('/api/decks');
+  listDecks(): Observable<PageResponse<LessonDeck>> {
+    return this.http.get<PageResponse<LessonDeck>>('/api/decks');
   }
 
   apod(date?: string): Observable<ApodResponse> {

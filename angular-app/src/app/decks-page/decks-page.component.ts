@@ -1,7 +1,7 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {DeckService, GenerateReq, LessonDeck} from '../deck.service';
+import {DeckService, GenerateReq, LessonDeck, PageResponse} from '../deck.service';
 import {NzFormModule} from 'ng-zorro-antd/form';
 import {NzInputModule} from 'ng-zorro-antd/input';
 import {NzSelectModule} from 'ng-zorro-antd/select';
@@ -42,7 +42,7 @@ import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
 export class DecksPageComponent implements OnInit, OnDestroy {
   form = new FormGroup({
     topic: new FormControl('Spiral galaxies', {nonNullable: true, validators: [Validators.required]}),
-    gradeLevel: new FormControl('8-10', {nonNullable: true}),
+    gradeLevel: new FormControl('4', {nonNullable: true}),
     locale: new FormControl('en', {nonNullable: true})
   });
   loading = false;
@@ -75,7 +75,8 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     this.listLoading = true;
     this.loadingSvc.show();
     try {
-      this.decks = await firstValueFrom(this.deckSvc.listDecks());
+      const page = await firstValueFrom(this.deckSvc.listDecks());
+      this.decks = this.extractDecks(page);
     } catch (e) {
       console.warn('Unable to load decks', e);
     } finally {
@@ -129,6 +130,13 @@ export class DecksPageComponent implements OnInit, OnDestroy {
 
   trackSlide(_: number, slide: any) {
     return slide?.title || slide?.text;
+  }
+
+  private extractDecks(page: PageResponse<LessonDeck> | LessonDeck[]) {
+    if (Array.isArray(page)) {
+      return page;
+    }
+    return page?.content ?? [];
   }
 
   private initializeReveal() {
