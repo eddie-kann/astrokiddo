@@ -6,7 +6,7 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div class="text-sm uppercase tracking-widest text-cosmic-muted">Lesson deck generator</div>
-          <h1 class="text-3xl font-semibold text-white">Craft cosmic lesson plans</h1>
+          <div class="text-3xl font-semibold text-white">Craft cosmic lesson plans</div>
           <p class="text-cosmic-muted max-w-2xl">Describe the topic, pick a grade band, and launch a slideshow-ready
           deck. A rocket loader will keep you company while we build it.</p>
         </div>
@@ -19,7 +19,7 @@
 
       <form nz-form [formGroup]="form" class="grid md:grid-cols-3 gap-4">
         <nz-form-item>
-          <nz-form-control nzHasFeedback>
+          <nz-form-control [nzHasFeedback]="true">
             <input nz-input placeholder="Topic" formControlName="topic"/>
           </nz-form-control>
         </nz-form-item>
@@ -50,7 +50,7 @@
     @if (loading) {
       <div
         class="absolute inset-0 bg-black/40 backdrop-blur flex flex-col items-center justify-center text-white gap-3">
-        <nz-spin nzSimple [nzIndicator]="null"></nz-spin>
+        <nz-spin [nzSimple]="true" [nzIndicator]="null"></nz-spin>
         <div class="flex items-center gap-2 text-cosmic-text">
           <i nz-icon nzType="rocket" class="text-cosmic-accent"></i>
           Launching your deck...
@@ -96,14 +96,6 @@
               <i nz-icon nzType="play-circle"></i>
               <span class="ml-1">Play Slideshow</span>
             </button>
-            <button nz-button nzType="default" (click)="export(deck, 'html')">
-              <i nz-icon nzType="cloud-download"></i>
-              HTML
-            </button>
-            <button nz-button nzType="default" (click)="export(deck, 'pdf')">
-              <i nz-icon nzType="file-pdf"></i>
-              PDF
-            </button>
           </div>
         </div>
       </nz-card>
@@ -119,7 +111,7 @@
   <nz-modal
     [(nzVisible)]="showSlideshow"
     [nzFooter]="null"
-    nzCentered
+    [nzCentered]="true"
     nzWrapClassName="slideshow-modal"
     [nzWidth]="'100vw'"
     (nzOnCancel)="closeSlideshow()">
@@ -156,7 +148,7 @@
                 }
                 @if (slide.imageUrl) {
                   <nz-image [nzSrc]="slide.imageUrl"
-                  [nzAlt]="slide.title || 'Slide image'"></nz-image>
+                            [nzAlt]="slide.title || 'Slide image'"></nz-image>
                 }
                 @if (slide.text) {
                   <div class="slide-note">{{ slide.text }}</div>

@@ -15,6 +15,7 @@ import {NzTagModule} from 'ng-zorro-antd/tag';
 import {NzImageModule} from 'ng-zorro-antd/image';
 import {firstValueFrom} from 'rxjs';
 import {LoadingService} from '../loading.service';
+import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
 
 @Component({
   selector: 'app-decks-page',
@@ -32,7 +33,8 @@ import {LoadingService} from '../loading.service';
     NzCardModule,
     NzModalModule,
     NzTagModule,
-    NzImageModule
+    NzImageModule,
+    NzImageViewComponent
   ],
   templateUrl: './decks-page.component.html',
   styleUrl: './decks-page.component.html'

@@ -72,7 +72,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   private setupAudio() {
     this.stopAudio();
-    if (this.apod?.ttsAudioUrl) {
+    if (this.apod?.tts_audio_url) {
       window.setTimeout(() => this.initializeWaveform(), 0);
     }
   }
@@ -99,7 +99,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
   }
 
   private initializeWaveform() {
-    if (!this.apod?.ttsAudioUrl || !this.waveformContainer) {
+    if (!this.apod?.tts_audio_url || !this.waveformContainer) {
       return;
     }
     this.waveSurfer?.destroy();
@@ -108,7 +108,7 @@ export class HomePageComponent implements OnInit, OnDestroy {
       waveColor: '#6aa9ff',
       progressColor: '#ffffff'
     });
-    this.waveSurfer.load(this.apod.ttsAudioUrl);
+    this.waveSurfer.load(this.apod.tts_audio_url);
     this.waveSurfer.on('play', () => this.playing = true);
     this.waveSurfer.on('pause', () => this.playing = false);
     this.waveSurfer.on('finish', () => this.playing = false);
