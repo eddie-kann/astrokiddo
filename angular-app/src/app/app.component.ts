@@ -5,11 +5,14 @@ import {NzLayoutModule} from 'ng-zorro-antd/layout';
 import {NzMenuModule} from 'ng-zorro-antd/menu';
 import {NzIconModule} from 'ng-zorro-antd/icon';
 import {NzButtonModule} from 'ng-zorro-antd/button';
+import {AsyncPipe} from '@angular/common';
+import {LoadingService} from './loading.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NzLayoutModule, NzMenuModule, NzIconModule, NzButtonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NzLayoutModule, NzMenuModule, NzIconModule, NzButtonModule, AsyncPipe],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -23,6 +26,15 @@ export class AppComponent {
   externalLinks = [
     {label: 'NASA', href: 'https://apod.nasa.gov/apod/astropix.html', icon: 'rocket'},
     {label: 'University', href: 'https://www.nasa.gov/learning-resources/', icon: 'book'},
-    {label: 'GitHub', href: 'https://github.com/astrokiddo', icon: 'github'}
+    {label: 'GitHub', href: 'https://github.com/eddie-kann/astrokiddo', icon: 'github'}
   ];
+
+  readonly loading$;
+
+  constructor(private loadingSvc: LoadingService) {
+    this.loading$ = this.loadingSvc.loading$.pipe(
+      distinctUntilChanged(),
+      debounceTime(0)
+    );
+  }
 }
