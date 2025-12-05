@@ -1,0 +1,14 @@
+.zoom-container {
+  overflow: hidden;
+  cursor: zoom-in;
+  border-radius: 18px;
+}
+
+.zoom-container nz-image {
+  display: block;
+  width: 100%;
+}
+
+.zoom-container:hover nz-image {
+  filter: brightness(1.05);
+}

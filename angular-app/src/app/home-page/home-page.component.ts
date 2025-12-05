@@ -29,6 +29,9 @@ export class HomePageComponent implements OnInit, OnDestroy {
   playing = false;
   private waveSurfer?: WaveSurfer;
   @ViewChild('waveformContainer') waveformContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('zoomFrame') zoomFrame?: ElementRef<HTMLDivElement>;
+  zooming = false;
+  zoomOrigin = '50% 50%';
 
   constructor(private deckSvc: DeckService, private loadingSvc: LoadingService) {
   }
@@ -112,5 +115,32 @@ export class HomePageComponent implements OnInit, OnDestroy {
     this.waveSurfer.on('play', () => this.playing = true);
     this.waveSurfer.on('pause', () => this.playing = false);
     this.waveSurfer.on('finish', () => this.playing = false);
+  }
+
+  onZoomEnter(event: MouseEvent) {
+    this.zooming = true;
+    this.updateZoomOrigin(event);
+  }
+
+  onZoomMove(event: MouseEvent) {
+    if (!this.zooming) {
+      return;
+    }
+    this.updateZoomOrigin(event);
+  }
+
+  onZoomLeave() {
+    this.zooming = false;
+  }
+
+  private updateZoomOrigin(event: MouseEvent) {
+    const frame = this.zoomFrame?.nativeElement;
+    if (!frame) {
+      return;
+    }
+    const rect = frame.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    this.zoomOrigin = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
   }
 }
