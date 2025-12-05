@@ -5,8 +5,9 @@ import com.astrokiddo.model.LessonDeck;
 import com.astrokiddo.service.DeckService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -40,7 +41,10 @@ public class DeckController {
                                             @RequestParam(required = false) String nasaSource,
                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdAfter,
                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant createdBefore,
-                                            @PageableDefault Pageable pageable) {
+                                            @RequestParam(name = "page", defaultValue = "0") int page,
+                                            @RequestParam(name = "size", defaultValue = "20") int size,
+                                            @RequestParam(name = "sort", required = false) String sort) {
+        Pageable pageable = createPageable(page, size, sort);
         return deckService.listDecks(topic, gradeLevel, locale, nasaSource, createdAfter, createdBefore, pageable);
     }
 
@@ -51,5 +55,19 @@ public class DeckController {
                         .cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES).cachePublic())
                         .body(deck))
                 .onErrorResume(NoSuchElementException.class, ex -> Mono.just(ResponseEntity.notFound().build()));
+    }
+
+    private Pageable createPageable(int page, int size, String sort) {
+        if (sort == null || sort.isBlank()) {
+            return PageRequest.of(page, size);
+        }
+
+        String[] parts = sort.split(",");
+        String property = parts[0];
+        Sort.Direction direction = parts.length > 1
+                ? Sort.Direction.fromString(parts[1])
+                : Sort.Direction.ASC;
+
+        return PageRequest.of(page, size, Sort.by(direction, property));
     }
 }
