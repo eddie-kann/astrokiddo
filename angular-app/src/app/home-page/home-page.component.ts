@@ -19,7 +19,7 @@ import {RouterLink} from '@angular/router';
   standalone: true,
   imports: [CommonModule, FormsModule, NzCardModule, NzDatePickerModule, NzImageModule, NzButtonModule, NzIconModule, NzSpinModule, NzImageViewComponent, RouterLink],
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.css'
+  styleUrls: ['./home-page.component.css']
 })
 export class HomePageComponent implements OnInit, OnDestroy {
   apod?: ApodResponse;

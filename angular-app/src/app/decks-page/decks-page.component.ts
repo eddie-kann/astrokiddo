@@ -37,7 +37,7 @@ import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
     NzImageViewComponent
   ],
   templateUrl: './decks-page.component.html',
-  styleUrl: './decks-page.component.html'
+  styleUrls: ['./decks-page.component.css']
 })
 export class DecksPageComponent implements OnInit, OnDestroy {
   form = new FormGroup({

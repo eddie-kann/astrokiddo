@@ -10,6 +10,7 @@ import com.astrokiddo.service.DeckService;
 import com.astrokiddo.service.LessonGeneratorService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.r2dbc.postgresql.codec.Json;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -98,8 +99,8 @@ public class DefaultDeckServiceImpl implements DeckService {
         Instant now = Instant.now();
         model.setGradeLevel(normalizeNullable(request.getGradeLevel()));
         model.setLocale(normalizeNullable(request.getLocale()));
-        Mono<String> nasaSourceMono = toJson(buildNasaSource(request));
-        Mono<String> contentJsonMono = toJson(copyWithoutSlides(model));
+        Mono<Json> nasaSourceMono = toJson(buildNasaSource(request));
+        Mono<Json> contentJsonMono = toJson(copyWithoutSlides(model));
 
         return Mono.zip(nasaSourceMono, contentJsonMono)
                 .flatMap(tuple -> {
@@ -163,29 +164,33 @@ public class DefaultDeckServiceImpl implements DeckService {
                     .map(this::toSlideModel)
                     .toList());
         }
-        if (deck.getContentJson() != null && !deck.getContentJson().isBlank()) {
-            try {
-                LessonDeck stored = objectMapper.readValue(deck.getContentJson(), LessonDeck.class);
-                if (stored.getEnrichment() != null) {
-                    model.setEnrichment(stored.getEnrichment());
+        Json contentJson = deck.getContentJson();
+        if (contentJson != null) {
+            contentJson.asString();
+            if (!contentJson.asString().isBlank()) {
+                try {
+                    LessonDeck stored = objectMapper.readValue(contentJson.asString(), LessonDeck.class);
+                    if (stored.getEnrichment() != null) {
+                        model.setEnrichment(stored.getEnrichment());
+                    }
+                    if (!hasSlides && stored.getSlides() != null && !stored.getSlides().isEmpty()) {
+                        stored.getSlides().forEach(s -> {
+                            if (s.getSlideUuid() == null) {
+                                s.setSlideUuid(UUID.randomUUID());
+                            }
+                        });
+                        model.setSlides(stored.getSlides());
+                    }
+                } catch (JsonProcessingException e) {
+                    throw new IllegalStateException("Failed to parse deck JSON for id " + deck.getId(), e);
                 }
-                if (!hasSlides && stored.getSlides() != null && !stored.getSlides().isEmpty()) {
-                    stored.getSlides().forEach(s -> {
-                        if (s.getSlideUuid() == null) {
-                            s.setSlideUuid(UUID.randomUUID());
-                        }
-                    });
-                    model.setSlides(stored.getSlides());
-                }
-            } catch (JsonProcessingException e) {
-                throw new IllegalStateException("Failed to parse deck JSON for id " + deck.getId(), e);
             }
         }
         return model;
     }
 
-    private Mono<String> toJson(Object value) {
-        return Mono.fromCallable(() -> objectMapper.writeValueAsString(value))
+    private Mono<Json> toJson(Object value) {
+        return Mono.fromCallable(() -> Json.of(objectMapper.writeValueAsString(value)))
                 .subscribeOn(Schedulers.boundedElastic())
                 .onErrorMap(JsonProcessingException.class,
                         e -> new IllegalStateException("Could not serialize deck content", e));
