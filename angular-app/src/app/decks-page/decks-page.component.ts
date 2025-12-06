@@ -139,7 +139,7 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     return page?.content ?? [];
   }
 
-  private initializeReveal() {
+  private async initializeReveal() {
     if (!this.selectedDeck) {
       return;
     }
@@ -162,10 +162,7 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     });
 
     if (typeof this.revealInstance.initialize === 'function') {
-      this.revealInstance.initialize();
-    }
-    if (typeof this.revealInstance.sync === 'function') {
-      this.revealInstance.sync();
+      await this.revealInstance.initialize();
     }
     if (typeof this.revealInstance.layout === 'function') {
       this.revealInstance.layout();
