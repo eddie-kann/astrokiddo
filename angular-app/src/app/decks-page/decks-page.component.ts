@@ -16,6 +16,7 @@ import {NzImageModule} from 'ng-zorro-antd/image';
 import {firstValueFrom} from 'rxjs';
 import {LoadingService} from '../loading.service';
 import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
+import Reveal from 'reveal.js';
 
 @Component({
   selector: 'app-decks-page',
@@ -54,7 +55,7 @@ export class DecksPageComponent implements OnInit, OnDestroy {
   lastRequest?: GenerateReq;
 
   @ViewChild('revealRoot') private revealRoot?: ElementRef<HTMLDivElement>;
-  private revealInstance?: any;
+  private revealInstance?: Reveal.Api;
 
   constructor(private deckSvc: DeckService, private loadingSvc: LoadingService) {
   }
@@ -133,19 +134,14 @@ export class DecksPageComponent implements OnInit, OnDestroy {
   }
 
   private async initializeReveal() {
-    if (!this.selectedDeck) {
-      return;
-    }
-    const revealGlobal = (window as any).Reveal;
-    if (!revealGlobal || !this.revealRoot?.nativeElement) {
-      console.warn('Reveal.js failed to load.');
+    if (!this.selectedDeck || !this.revealRoot?.nativeElement) {
       return;
     }
 
     this.destroyReveal();
 
     const revealContainer = this.revealRoot.nativeElement;
-    this.revealInstance = new revealGlobal(revealContainer, {
+    this.revealInstance = new Reveal(revealContainer, {
       embedded: true,
       hash: false,
       controls: true,
@@ -154,21 +150,13 @@ export class DecksPageComponent implements OnInit, OnDestroy {
       backgroundTransition: 'fade'
     });
 
-    if (typeof this.revealInstance.initialize === 'function') {
-      await this.revealInstance.initialize();
-    }
-    if (typeof this.revealInstance.layout === 'function') {
-      this.revealInstance.layout();
-    }
-    if (typeof this.revealInstance.slide === 'function') {
-      this.revealInstance.slide(0);
-    }
+    await this.revealInstance.initialize();
+    this.revealInstance.layout();
+    this.revealInstance.slide(0);
   }
 
   private destroyReveal() {
-    if (this.revealInstance && typeof this.revealInstance.destroy === 'function') {
-      this.revealInstance.destroy();
-    }
+    this.revealInstance?.destroy();
     this.revealInstance = undefined;
   }
 }
