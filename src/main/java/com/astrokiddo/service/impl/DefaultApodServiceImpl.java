@@ -15,8 +15,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -29,6 +31,8 @@ import java.util.UUID;
 @Service
 public class DefaultApodServiceImpl implements ApodService {
     private static final Logger log = LoggerFactory.getLogger(DefaultApodServiceImpl.class);
+    //TODO remove it when we are ready
+    private static final LocalDate MIN_APOD_DATE = LocalDate.of(2025, 12, 1);
 
     private final ApodRepository apodRepository;
     private final ApodClient apodClient;
@@ -56,6 +60,11 @@ public class DefaultApodServiceImpl implements ApodService {
     @Override
     public Mono<ApodResponseDto> getOrCreateApod(LocalDate date) {
         LocalDate targetDate = date != null ? date : LocalDate.now(zoneId);
+        LocalDate today = LocalDate.now(zoneId);
+        if (targetDate.isBefore(MIN_APOD_DATE) || targetDate.isAfter(today)) {
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("APOD date must be between %s and %s", MIN_APOD_DATE, today)));
+        }
         return apodRepository.findByApodDate(targetDate)
                 .map(this::toDto)
                 .switchIfEmpty(fetchAndPersistApod(targetDate));
