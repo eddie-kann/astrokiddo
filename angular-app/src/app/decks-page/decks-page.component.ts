@@ -53,6 +53,7 @@ export class DecksPageComponent implements OnInit, OnDestroy {
   showSlideshow = false;
   selectedDeck?: LessonDeck;
   lastRequest?: GenerateReq;
+  slideshowLoading = false;
 
   @ViewChild('revealRoot') private revealRoot?: ElementRef<HTMLDivElement>;
   private revealInstance?: Reveal.Api;
@@ -103,13 +104,24 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  openSlideshow(deck: LessonDeck) {
+  async openSlideshow(deck: LessonDeck) {
     this.selectedDeck = deck;
     this.showSlideshow = true;
+    this.slideshowLoading = true;
+    try {
+      this.selectedDeck = await firstValueFrom(this.deckSvc.getDeckById(deck.id));
+    } catch (e) {
+      console.warn('Unable to load deck details', e);
+    } finally {
+      this.slideshowLoading = false;
+      setTimeout(() => void this.initializeReveal());
+    }
   }
 
   closeSlideshow() {
     this.showSlideshow = false;
+    this.slideshowLoading = false;
+    this.selectedDeck = undefined;
     this.destroyReveal();
   }
 

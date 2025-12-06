@@ -86,7 +86,10 @@
       <nz-card
         class="glass-panel text-cosmic-muted"
         [nzBodyStyle]="{padding: '20px'}"
-        [nzTitle]="deck.topic">
+        [nzTitle]="deckTitle">
+        <ng-template #deckTitle>
+          <div class="text-cosmic-muted">{{ deck.topic }}</div>
+        </ng-template>
         <div class="flex flex-col gap-3">
           <div class="flex flex-wrap items-center gap-2 text-sm text-cosmic-muted">
             <span class="px-2 py-1 rounded-full bg-white/5">Deck ID: {{ deck.id }}</span>
@@ -124,96 +127,103 @@
     [nzWidth]="'100vw'"
     (nzAfterOpen)="onSlideshowOpened()"
     (nzOnCancel)="closeSlideshow()">
-    <div class="slideshow-stage">
-      <div class="slideshow-header">
-        <div>
-          <div class="text-sm text-cosmic-muted">{{ selectedDeck?.id }}</div>
-          <div class="text-xl text-white font-semibold">{{ selectedDeck?.topic }}</div>
-        </div>
-        <button nz-button nzShape="circle" nzType="default" (click)="closeSlideshow()">
-          ✕
-        </button>
+    @if (slideshowLoading) {
+      <div class="slideshow-stage flex items-center justify-center min-h-[40vh] text-cosmic-muted">
+        <nz-spin nzSimple="true" nzSize="large"></nz-spin>
+        <span class="ml-3">Loading slideshow...</span>
       </div>
-      <div class="slideshow-wrapper glass-panel">
-        <div class="reveal" #revealRoot>
-          <div class="slides">
-            @if (selectedDeck) {
-              <section>
-                <h2>{{ selectedDeck.topic }}</h2>
-                <div class="cover-meta">Deck ID: {{ selectedDeck.id }}</div>
-                <div class="cover-meta">Generated: {{ selectedDeck.createdAt | date: 'medium' }}</div>
-                @if (lastRequest?.gradeLevel) {
-                  <div class="cover-meta">Grade Level: {{ lastRequest?.gradeLevel }}</div>
-                }
-                @if (selectedDeck.enrichment?.hook) {
-                  <div class="cover-sub">{{ selectedDeck.enrichment?.hook }}</div>
-                }
-              </section>
-            }
-            @for (slide of selectedDeck?.slides; track trackSlide($index, slide)) {
-              <section>
-                @if (slide.title) {
-                  <h3>{{ slide.title }}</h3>
-                }
-                @if (slide.imageUrl) {
-                  <nz-image [nzSrc]="slide.imageUrl"
-                            [nzAlt]="slide.title || 'Slide image'"></nz-image>
-                }
-                @if (slide.text) {
-                  <div class="slide-note">{{ slide.text }}</div>
-                }
-                <div class="slide-footer">{{ slide.type }}</div>
-                @if (slide.attribution) {
-                  <div class="slide-attribution">© {{ slide.attribution }}</div>
-                }
-              </section>
-            }
-            @if (selectedDeck?.enrichment?.simple_explanation) {
-              <section>
-                <h3>Simple Explanation</h3>
-                <div class="slide-note">{{ selectedDeck?.enrichment?.simple_explanation }}</div>
-              </section>
-            }
-            @if (selectedDeck?.enrichment?.why_it_matters) {
-              <section>
-                <h3>Why It Matters</h3>
-                <div class="slide-note">{{ selectedDeck?.enrichment?.why_it_matters }}</div>
-              </section>
-            }
-            @if (selectedDeck?.enrichment?.class_question) {
-              <section>
-                <h3>Class Question</h3>
-                <div class="slide-note">{{ selectedDeck?.enrichment?.class_question }}</div>
-              </section>
-            }
-            @if (selectedDeck?.enrichment?.fun_fact) {
-              <section>
-                <h3>Fun Fact</h3>
-                <div class="slide-note">{{ selectedDeck?.enrichment?.fun_fact }}</div>
-              </section>
-            }
-            @if (selectedDeck?.enrichment?.vocabulary?.length) {
-              <section>
-                <h3>Vocabulary</h3>
-                <ul>
-                  @for (term of selectedDeck?.enrichment?.vocabulary; track term) {
-                    <li>
-                      <div class="term">{{ term.term }}</div>
-                      <div class="definition">{{ term.definition }}</div>
-                    </li>
+    } @else {
+      <div class="slideshow-stage">
+        <div class="slideshow-header">
+          <div>
+            <div class="text-sm text-cosmic-muted">{{ selectedDeck?.id }}</div>
+            <div class="text-xl text-white font-semibold">{{ selectedDeck?.topic }}</div>
+          </div>
+          <button nz-button nzShape="circle" nzType="default" (click)="closeSlideshow()">
+            ✕
+          </button>
+        </div>
+        <div class="slideshow-wrapper glass-panel">
+          <div class="reveal" #revealRoot>
+            <div class="slides">
+              @if (selectedDeck) {
+                <section>
+                  <h2>{{ selectedDeck.topic }}</h2>
+                  <div class="cover-meta">Deck ID: {{ selectedDeck.id }}</div>
+                  <div class="cover-meta">Generated: {{ selectedDeck.createdAt | date: 'medium' }}</div>
+                  @if (lastRequest?.gradeLevel) {
+                    <div class="cover-meta">Grade Level: {{ lastRequest?.gradeLevel }}</div>
                   }
-                </ul>
-              </section>
-            }
-            @if (selectedDeck?.enrichment?.attribution) {
-              <section>
-                <h3>Attribution</h3>
-                <div class="slide-note">{{ selectedDeck?.enrichment?.attribution }}</div>
-              </section>
-            }
+                  @if (selectedDeck.enrichment?.hook) {
+                    <div class="cover-sub">{{ selectedDeck.enrichment?.hook }}</div>
+                  }
+                </section>
+              }
+              @for (slide of selectedDeck?.slides; track trackSlide($index, slide)) {
+                <section>
+                  @if (slide.title) {
+                    <h3>{{ slide.title }}</h3>
+                  }
+                  @if (slide.imageUrl) {
+                    <nz-image [nzSrc]="slide.imageUrl"
+                              [nzAlt]="slide.title || 'Slide image'"></nz-image>
+                  }
+                  @if (slide.text) {
+                    <div class="slide-note">{{ slide.text }}</div>
+                  }
+                  <div class="slide-footer">{{ slide.type }}</div>
+                  @if (slide.attribution) {
+                    <div class="slide-attribution">© {{ slide.attribution }}</div>
+                  }
+                </section>
+              }
+              @if (selectedDeck?.enrichment?.simple_explanation) {
+                <section>
+                  <h3>Simple Explanation</h3>
+                  <div class="slide-note">{{ selectedDeck?.enrichment?.simple_explanation }}</div>
+                </section>
+              }
+              @if (selectedDeck?.enrichment?.why_it_matters) {
+                <section>
+                  <h3>Why It Matters</h3>
+                  <div class="slide-note">{{ selectedDeck?.enrichment?.why_it_matters }}</div>
+                </section>
+              }
+              @if (selectedDeck?.enrichment?.class_question) {
+                <section>
+                  <h3>Class Question</h3>
+                  <div class="slide-note">{{ selectedDeck?.enrichment?.class_question }}</div>
+                </section>
+              }
+              @if (selectedDeck?.enrichment?.fun_fact) {
+                <section>
+                  <h3>Fun Fact</h3>
+                  <div class="slide-note">{{ selectedDeck?.enrichment?.fun_fact }}</div>
+                </section>
+              }
+              @if (selectedDeck?.enrichment?.vocabulary?.length) {
+                <section>
+                  <h3>Vocabulary</h3>
+                  <ul>
+                    @for (term of selectedDeck?.enrichment?.vocabulary; track term) {
+                      <li>
+                        <div class="term">{{ term.term }}</div>
+                        <div class="definition">{{ term.definition }}</div>
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+              @if (selectedDeck?.enrichment?.attribution) {
+                <section>
+                  <h3>Attribution</h3>
+                  <div class="slide-note">{{ selectedDeck?.enrichment?.attribution }}</div>
+                </section>
+              }
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    }
   </nz-modal>
 </div>

@@ -80,6 +80,12 @@ export class DeckService {
     return this.http.get<PageResponse<LessonDeck>>('/api/decks');
   }
 
+  getDeckById(id: string): Observable<LessonDeck> {
+    const normalizedId = id?.startsWith('deck-') ? id.substring(5) : id;
+    return this.http.get<LessonDeck>(`/api/decks/${normalizedId}`);
+  }
+
+
   apod(date?: string): Observable<ApodResponse> {
     let params = new HttpParams();
     if (date) {
