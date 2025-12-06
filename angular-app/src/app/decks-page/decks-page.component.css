@@ -1,0 +1,9 @@
+.reveal:not(.ready) .slides > section {
+  display: block;
+  position: relative;
+}
+
+.slideshow-wrapper {
+  max-height: 80vh;
+  overflow: hidden;
+}

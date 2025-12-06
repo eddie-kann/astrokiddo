@@ -55,7 +55,6 @@ export class DecksPageComponent implements OnInit, OnDestroy {
 
   @ViewChild('revealRoot') private revealRoot?: ElementRef<HTMLDivElement>;
   private revealInstance?: any;
-  private revealInitTimeout?: number;
 
   constructor(private deckSvc: DeckService, private loadingSvc: LoadingService) {
   }
@@ -66,9 +65,6 @@ export class DecksPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.destroyReveal();
-    if (this.revealInitTimeout) {
-      window.clearTimeout(this.revealInitTimeout);
-    }
   }
 
   async fetchDecks() {
@@ -109,20 +105,17 @@ export class DecksPageComponent implements OnInit, OnDestroy {
   openSlideshow(deck: LessonDeck) {
     this.selectedDeck = deck;
     this.showSlideshow = true;
-    if (this.revealInitTimeout) {
-      window.clearTimeout(this.revealInitTimeout);
-    }
-    this.revealInitTimeout = window.setTimeout(() => this.initializeReveal(), 0);
   }
 
   closeSlideshow() {
     this.showSlideshow = false;
-    if (this.revealInitTimeout) {
-      window.clearTimeout(this.revealInitTimeout);
-      this.revealInitTimeout = undefined;
-    }
     this.destroyReveal();
   }
+
+  onSlideshowOpened() {
+    void this.initializeReveal();
+  }
+
 
   trackDeck(_: number, deck: LessonDeck) {
     return deck.id;

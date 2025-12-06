@@ -1,17 +1,17 @@
 <div class="flex flex-col gap-6">
   <div class="glass-panel p-6 relative overflow-hidden">
     <div
-    class="absolute inset-0 opacity-20 bg-gradient-to-br from-cosmic-accent/40 via-transparent to-transparent pointer-events-none"></div>
+      class="absolute inset-0 opacity-20 bg-gradient-to-br from-cosmic-accent/40 via-transparent to-transparent pointer-events-none"></div>
     <div class="relative flex flex-col gap-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div class="text-sm uppercase tracking-widest text-cosmic-muted">Lesson deck generator</div>
           <div class="text-3xl font-semibold text-white">Craft cosmic lesson plans</div>
           <p class="text-cosmic-muted max-w-2xl">Describe the topic, pick a grade band, and launch a slideshow-ready
-          deck. A rocket loader will keep you company while we build it.</p>
+            deck. A rocket loader will keep you company while we build it.</p>
         </div>
         <button nz-button nzType="primary" nzShape="round" class="bg-cosmic-accent border-cosmic-accent"
-          (click)="generateDeck()" [disabled]="loading">
+                (click)="generateDeck()" [disabled]="loading">
           <i nz-icon nzType="rocket" nzTheme="outline"></i>
           <span class="ml-1">{{ loading ? 'Generating...' : 'Generate Deck' }}</span>
         </button>
@@ -73,7 +73,7 @@
       Existing Decks
     </div>
     <button nz-button nzType="default" nzShape="round" class="bg-white/5" (click)="fetchDecks()"
-      [disabled]="listLoading">
+            [disabled]="listLoading">
       @if (listLoading) {
         <i nz-icon nzType="loading"></i>
       }
@@ -84,9 +84,9 @@
   <div class="grid md:grid-cols-2 gap-4">
     @for (deck of decks; track trackDeck($index, deck)) {
       <nz-card
-        class="glass-panel p-6 text-center text-cosmic-muted"
+        class="glass-panel text-cosmic-muted"
         [nzBodyStyle]="{padding: '20px'}"
-        [nzTitle]="deck.topic" >
+        [nzTitle]="deck.topic">
         <div class="flex flex-col gap-3">
           <div class="flex flex-wrap items-center gap-2 text-sm text-cosmic-muted">
             <span class="px-2 py-1 rounded-full bg-white/5">Deck ID: {{ deck.id }}</span>
@@ -100,7 +100,7 @@
           </div>
           <div class="flex flex-wrap gap-2">
             <button nz-button nzType="primary" nzShape="round" class="bg-cosmic-accent border-cosmic-accent"
-              (click)="openSlideshow(deck)">
+                    (click)="openSlideshow(deck)">
               <i nz-icon nzType="play-circle"></i>
               <span class="ml-1">Play Slideshow</span>
             </button>
@@ -122,6 +122,7 @@
     [nzCentered]="true"
     nzWrapClassName="slideshow-modal"
     [nzWidth]="'100vw'"
+    (nzAfterOpen)="onSlideshowOpened()"
     (nzOnCancel)="closeSlideshow()">
     <div class="slideshow-stage">
       <div class="slideshow-header">
