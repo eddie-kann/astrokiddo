@@ -3,11 +3,13 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
 export interface Slide {
+  slideUuid?: string;
   type: string;
   title?: string;
   text?: string;
   imageUrl?: string;
   attribution?: string;
+  ttsAudioUrl?: string;
 }
 
 export interface VocabularyItem {
@@ -27,12 +29,14 @@ export interface DeckEnrichment {
   vocabulary?: VocabularyItem[];
   fun_fact?: string;
   attribution?: string;
-  meta?: EnrichmentMeta;
+  _meta?: EnrichmentMeta;
 }
 
 export interface LessonDeck {
   id: string;
   topic: string;
+  gradeLevel?: string;
+  locale?: string;
   createdAt: string;
   slides: Slide[];
   enrichment?: DeckEnrichment;

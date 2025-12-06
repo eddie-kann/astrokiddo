@@ -94,8 +94,8 @@
           <div class="flex flex-wrap items-center gap-2 text-sm text-cosmic-muted">
             <span class="px-2 py-1 rounded-full bg-white/5">Deck ID: {{ deck.id }}</span>
             <span class="px-2 py-1 rounded-full bg-white/5">Created: {{ deck.createdAt | date:'medium' }}</span>
-            @if (deck.enrichment?.meta?.model) {
-              <nz-tag nzColor="blue">{{ deck.enrichment?.meta?.model }}</nz-tag>
+            @if (deck.enrichment?._meta?.model) {
+              <nz-tag nzColor="blue">{{ deck.enrichment?._meta?.model }}</nz-tag>
             }
           </div>
           <div class="text-cosmic-text text-sm deck-summary">
