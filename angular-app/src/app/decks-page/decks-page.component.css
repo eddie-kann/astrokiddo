@@ -1,6 +1,18 @@
 .reveal:not(.ready) .slides > section {
   display: block;
   position: relative;
+  top: 0;
+  left: 0;
+  transform: none;
+  width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+.reveal:not(.ready) .slides {
+  position: relative;
+  inset: 0;
+  margin: 0;
 }
 
 .slideshow-wrapper {
@@ -15,15 +27,15 @@
 }
 
 .reveal .slides {
-  padding: 12px;
+  padding: clamp(0.75rem, 2vw, 1.25rem);
 }
 
 .reveal .slides section {
   padding: 1.25rem clamp(1.25rem, 2vw, 2rem);
-  border-radius: 18px;
+  border-radius: 1.125rem;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  border: 0.0625rem solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1.125rem 2.5rem rgba(0, 0, 0, 0.35);
   display: flex !important;
   flex-direction: column;
   gap: 0.75rem;
@@ -61,9 +73,9 @@
 
 .slide-note {
   background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
+  border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 0.0625rem solid rgba(255, 255, 255, 0.06);
 }
 
 .slide-footer {
@@ -81,7 +93,7 @@
 .slide-zoom-frame {
   position: relative;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 1rem;
   background:
     radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.12), transparent 45%),
     radial-gradient(circle at 80% 10%, rgba(34, 211, 238, 0.1), transparent 40%),
@@ -106,17 +118,17 @@
 
 .slide-zoom-hint {
   position: absolute;
-  right: 12px;
-  bottom: 12px;
+  right: 0.75rem;
+  bottom: 0.75rem;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 0.375rem 0.625rem;
   font-size: 0.85rem;
   color: #e5e7eb;
   background: rgba(0, 0, 0, 0.5);
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 0.0625rem solid rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(6px);
   pointer-events: none;
 }
