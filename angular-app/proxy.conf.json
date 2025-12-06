@@ -1,8 +1,8 @@
 
 {
   "/api": {
-    "target": "http://localhost:8091",
-    "secure": false,
+    "target": "https://astrokiddo.com",
+    "secure": true,
     "changeOrigin": true,
     "logLevel": "debug"
   }

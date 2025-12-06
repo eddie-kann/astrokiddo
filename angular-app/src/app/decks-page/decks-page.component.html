@@ -145,7 +145,7 @@
         } @else {
           <div class="p-4 md:p-6">
             <div class="slideshow-wrapper glass-panel rounded-xl border border-white/10 bg-white/5 p-4 shadow-inner">
-              <div class="reveal" #revealRoot>
+              <div class="reveal" [class.reveal-embedded]="showSlideshow" #revealRoot>
                 <div class="slides">
                   @if (selectedDeck) {
                     <section>
