@@ -9,15 +9,15 @@ import {NzIconModule} from 'ng-zorro-antd/icon';
 import {NzSpinModule} from 'ng-zorro-antd/spin';
 import {FormsModule} from '@angular/forms';
 import {firstValueFrom} from 'rxjs';
-import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
 import WaveSurfer from '../vendor/wavesurfer.js';
 import {LoadingService} from '../loading.service';
 import {RouterLink} from '@angular/router';
+import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
 
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, NzCardModule, NzDatePickerModule, NzImageModule, NzButtonModule, NzIconModule, NzSpinModule, NzImageViewComponent, RouterLink],
+  imports: [CommonModule, FormsModule, NzCardModule, NzDatePickerModule, NzImageModule, NzButtonModule, NzIconModule, NzSpinModule, RouterLink, NzImageViewComponent],
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.css']
 })
@@ -131,25 +131,21 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   onZoomLeave() {
     this.zooming = false;
-    this.resetZoomOrigin();
-  }
-
-  onImagePreview() {
-    this.resetZoomOrigin();
+    this.resetSlideZoomOrigin();
   }
 
   private updateZoomOrigin(event: MouseEvent) {
-    const frame = this.zoomFrame?.nativeElement;
-    if (!frame) {
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) {
       return;
     }
-    const rect = frame.getBoundingClientRect();
+    const rect = target.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
     this.zoomOrigin = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
   }
 
-  private resetZoomOrigin() {
+  private resetSlideZoomOrigin() {
     this.zoomOrigin = '50% 50%';
   }
 }
