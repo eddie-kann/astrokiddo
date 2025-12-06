@@ -63,7 +63,7 @@ public class DefaultDeckCrudServiceImpl implements DeckCrudService {
             criteria = criteria.and(Criteria.where("locale").is(locale.toLowerCase()));
         }
         if (nasaSource != null && !nasaSource.isBlank()) {
-            criteria = criteria.and(Criteria.where("nasa_source").like("%" + nasaSource.toLowerCase() + "%"));
+            criteria = criteria.and(Criteria.where("nasa_source::text").like("%" + nasaSource.toLowerCase() + "%"));
         }
         if (createdAfter != null) {
             criteria = criteria.and(Criteria.where("created_at").greaterThanOrEquals(createdAfter));

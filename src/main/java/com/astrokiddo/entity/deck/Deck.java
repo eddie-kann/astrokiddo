@@ -3,6 +3,7 @@ package com.astrokiddo.entity.deck;
 import com.astrokiddo.entity.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
+import io.r2dbc.postgresql.codec.Json;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -35,10 +36,10 @@ public class Deck extends BaseEntity {
     private String description;
 
     @Column("nasa_source")
-    private String nasaSource;
+    private Json nasaSource;
 
     @Column("content_json")
-    private String contentJson;
+    private Json contentJson;
 
     @Transient
     private List<Slide> slides = new ArrayList<>();

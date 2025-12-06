@@ -3,11 +3,13 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
 export interface Slide {
+  slideUuid?: string;
   type: string;
   title?: string;
   text?: string;
   imageUrl?: string;
   attribution?: string;
+  ttsAudioUrl?: string;
 }
 
 export interface VocabularyItem {
@@ -27,12 +29,14 @@ export interface DeckEnrichment {
   vocabulary?: VocabularyItem[];
   fun_fact?: string;
   attribution?: string;
-  meta?: EnrichmentMeta;
+  _meta?: EnrichmentMeta;
 }
 
 export interface LessonDeck {
   id: string;
   topic: string;
+  gradeLevel?: string;
+  locale?: string;
   createdAt: string;
   slides: Slide[];
   enrichment?: DeckEnrichment;
@@ -42,6 +46,16 @@ export interface GenerateReq {
   topic: string;
   gradeLevel?: string;
   locale?: string;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  totalElements?: number;
+  totalPages?: number;
+  size?: number;
+  number?: number;
+  first?: boolean;
+  last?: boolean;
 }
 
 export interface ApodResponse {
@@ -66,9 +80,15 @@ export class DeckService {
     return this.http.post<LessonDeck>('/api/decks/generate', req);
   }
 
-  listDecks(): Observable<LessonDeck[]> {
-    return this.http.get<LessonDeck[]>('/api/decks');
+  listDecks(): Observable<PageResponse<LessonDeck>> {
+    return this.http.get<PageResponse<LessonDeck>>('/api/decks');
   }
+
+  getDeckById(id: string): Observable<LessonDeck> {
+    const normalizedId = id?.startsWith('deck-') ? id.substring(5) : id;
+    return this.http.get<LessonDeck>(`/api/decks/${normalizedId}`);
+  }
+
 
   apod(date?: string): Observable<ApodResponse> {
     let params = new HttpParams();

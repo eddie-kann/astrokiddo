@@ -1,7 +1,7 @@
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {DeckService, GenerateReq, LessonDeck} from '../deck.service';
+import {DeckService, GenerateReq, LessonDeck, PageResponse} from '../deck.service';
 import {NzFormModule} from 'ng-zorro-antd/form';
 import {NzInputModule} from 'ng-zorro-antd/input';
 import {NzSelectModule} from 'ng-zorro-antd/select';
@@ -10,12 +10,10 @@ import {NzIconModule} from 'ng-zorro-antd/icon';
 import {NzSpinModule} from 'ng-zorro-antd/spin';
 import {NzListModule} from 'ng-zorro-antd/list';
 import {NzCardModule} from 'ng-zorro-antd/card';
-import {NzModalModule} from 'ng-zorro-antd/modal';
 import {NzTagModule} from 'ng-zorro-antd/tag';
-import {NzImageModule} from 'ng-zorro-antd/image';
 import {firstValueFrom} from 'rxjs';
 import {LoadingService} from '../loading.service';
-import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
+import Reveal from 'reveal.js';
 
 @Component({
   selector: 'app-decks-page',
@@ -31,18 +29,15 @@ import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
     NzSpinModule,
     NzListModule,
     NzCardModule,
-    NzModalModule,
-    NzTagModule,
-    NzImageModule,
-    NzImageViewComponent
+    NzTagModule
   ],
   templateUrl: './decks-page.component.html',
-  styleUrl: './decks-page.component.html'
+  styleUrls: ['./decks-page.component.css']
 })
 export class DecksPageComponent implements OnInit, OnDestroy {
   form = new FormGroup({
     topic: new FormControl('Spiral galaxies', {nonNullable: true, validators: [Validators.required]}),
-    gradeLevel: new FormControl('8-10', {nonNullable: true}),
+    gradeLevel: new FormControl('4', {nonNullable: true}),
     locale: new FormControl('en', {nonNullable: true})
   });
   loading = false;
@@ -52,10 +47,12 @@ export class DecksPageComponent implements OnInit, OnDestroy {
   showSlideshow = false;
   selectedDeck?: LessonDeck;
   lastRequest?: GenerateReq;
+  slideshowLoading = false;
+  slideZooming = false;
+  slideZoomOrigin = '50% 50%';
 
   @ViewChild('revealRoot') private revealRoot?: ElementRef<HTMLDivElement>;
-  private revealInstance?: any;
-  private revealInitTimeout?: number;
+  private revealInstance?: Reveal.Api;
 
   constructor(private deckSvc: DeckService, private loadingSvc: LoadingService) {
   }
@@ -66,16 +63,14 @@ export class DecksPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.destroyReveal();
-    if (this.revealInitTimeout) {
-      window.clearTimeout(this.revealInitTimeout);
-    }
   }
 
   async fetchDecks() {
     this.listLoading = true;
     this.loadingSvc.show();
     try {
-      this.decks = await firstValueFrom(this.deckSvc.listDecks());
+      const page = await firstValueFrom(this.deckSvc.listDecks());
+      this.decks = this.extractDecks(page);
     } catch (e) {
       console.warn('Unable to load decks', e);
     } finally {
@@ -105,21 +100,24 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  openSlideshow(deck: LessonDeck) {
+  async openSlideshow(deck: LessonDeck) {
     this.selectedDeck = deck;
     this.showSlideshow = true;
-    if (this.revealInitTimeout) {
-      window.clearTimeout(this.revealInitTimeout);
+    this.slideshowLoading = true;
+    try {
+      this.selectedDeck = await firstValueFrom(this.deckSvc.getDeckById(deck.id));
+    } catch (e) {
+      console.warn('Unable to load deck details', e);
+    } finally {
+      this.slideshowLoading = false;
+      setTimeout(() => void this.initializeReveal());
     }
-    this.revealInitTimeout = window.setTimeout(() => this.initializeReveal(), 0);
   }
 
   closeSlideshow() {
     this.showSlideshow = false;
-    if (this.revealInitTimeout) {
-      window.clearTimeout(this.revealInitTimeout);
-      this.revealInitTimeout = undefined;
-    }
+    this.slideshowLoading = false;
+    this.selectedDeck = undefined;
     this.destroyReveal();
   }
 
@@ -131,47 +129,75 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     return slide?.title || slide?.text;
   }
 
-  private initializeReveal() {
-    if (!this.selectedDeck) {
-      return;
+  private extractDecks(page: PageResponse<LessonDeck> | LessonDeck[]) {
+    if (Array.isArray(page)) {
+      return page;
     }
-    const container = this.revealRoot?.nativeElement;
-    const revealGlobal = (window as any).Reveal;
-    if (!revealGlobal || !container) {
-      console.warn('Reveal.js failed to load.');
+    return page?.content ?? [];
+  }
+
+  private async initializeReveal() {
+    if (!this.selectedDeck || !this.revealRoot?.nativeElement) {
       return;
     }
 
     this.destroyReveal();
 
-    this.revealInstance = new revealGlobal({
-      container,
+    const revealContainer = this.revealRoot.nativeElement;
+    this.revealInstance = new Reveal(revealContainer, {
       embedded: true,
       hash: false,
       controls: true,
       progress: true,
       transition: 'slide',
-      backgroundTransition: 'fade'
+      backgroundTransition: 'fade',
+      width: 1280,
+      height: 720,
+      margin: 0.06,
+      minScale: 0.35,
+      maxScale: 1
     });
 
-    if (typeof this.revealInstance.initialize === 'function') {
-      this.revealInstance.initialize();
+    await this.revealInstance.initialize();
+    this.revealInstance.on('slidechanged', () => this.resetSlideZoomOrigin());
+    this.revealInstance.layout();
+    this.revealInstance.slide(0);
+  }
+
+  onSlideZoomEnter(event: MouseEvent) {
+    this.slideZooming = true;
+    this.updateSlideZoomOrigin(event);
+  }
+
+  onSlideZoomMove(event: MouseEvent) {
+    if (!this.slideZooming) {
+      return;
     }
-    if (typeof this.revealInstance.sync === 'function') {
-      this.revealInstance.sync();
+    this.updateSlideZoomOrigin(event);
+  }
+
+  onSlideZoomLeave() {
+    this.slideZooming = false;
+    this.resetSlideZoomOrigin();
+  }
+
+  private updateSlideZoomOrigin(event: MouseEvent) {
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) {
+      return;
     }
-    if (typeof this.revealInstance.layout === 'function') {
-      this.revealInstance.layout();
-    }
-    if (typeof this.revealInstance.slide === 'function') {
-      this.revealInstance.slide(0);
-    }
+    const rect = target.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    this.slideZoomOrigin = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
+  }
+
+  private resetSlideZoomOrigin() {
+    this.slideZoomOrigin = '50% 50%';
   }
 
   private destroyReveal() {
-    if (this.revealInstance && typeof this.revealInstance.destroy === 'function') {
-      this.revealInstance.destroy();
-    }
+    this.revealInstance?.destroy();
     this.revealInstance = undefined;
   }
 }

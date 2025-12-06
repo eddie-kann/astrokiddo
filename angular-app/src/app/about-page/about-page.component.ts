@@ -9,7 +9,7 @@ import {NzIconModule} from 'ng-zorro-antd/icon';
   standalone: true,
   imports: [NzCardModule, NzImageModule, NzIconModule],
   templateUrl: './about-page.component.html',
-  styleUrl: './about-page.component.css'
+  styleUrls: ['./about-page.component.css']
 })
 export class AboutPageComponent {
   highlights = [

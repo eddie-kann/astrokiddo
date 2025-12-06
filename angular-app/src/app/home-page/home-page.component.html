@@ -125,14 +125,12 @@
                         (mousemove)="onZoomMove($event)"
                         (mouseenter)="onZoomEnter($event)"
                         (mouseleave)="onZoomLeave()">
-                        <nz-image
+                        <img
                           class="block w-full transition-transform duration-300 ease-out"
-                          [nzSrc]="apodImageSrc"
-                          [nzAlt]="apod.title || 'Astronomy Picture of the Day'"
-                          nzDisablePreview="false"
+                          [src]="apodImageSrc"
+                          [alt]="apod.title || 'Astronomy Picture of the Day'"
                           [style.transform]="zooming ? 'scale(1.8)' : 'scale(1)'"
                           [style.transform-origin]="zoomOrigin">
-                        </nz-image>
                         <div class="absolute bottom-3 right-3 text-xs bg-black/60 text-white px-3 py-1 rounded-full border border-white/10 shadow-lg">Hover to zoom</div>
                       </div>
                     </nz-image-group>

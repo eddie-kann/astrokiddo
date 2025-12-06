@@ -14,7 +14,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive, NzLayoutModule, NzMenuModule, NzIconModule, NzButtonModule, AsyncPipe],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   navLinks = [
