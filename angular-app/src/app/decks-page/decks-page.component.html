@@ -159,6 +159,7 @@
                     </section>
                   }
                   @for (slide of selectedDeck?.slides; track trackSlide($index, slide)) {
+                    <section>
                       @if (slide.title) {
                         <h3>{{ slide.title }}</h3>
                       }
@@ -188,6 +189,7 @@
                       @if (slide.attribution) {
                         <div class="slide-attribution">© {{ slide.attribution }}</div>
                       }
+                    </section>
                   }
                   @if (selectedDeck?.enrichment?.simple_explanation) {
                     <section>
