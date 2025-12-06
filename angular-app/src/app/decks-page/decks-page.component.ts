@@ -10,12 +10,9 @@ import {NzIconModule} from 'ng-zorro-antd/icon';
 import {NzSpinModule} from 'ng-zorro-antd/spin';
 import {NzListModule} from 'ng-zorro-antd/list';
 import {NzCardModule} from 'ng-zorro-antd/card';
-import {NzModalModule} from 'ng-zorro-antd/modal';
 import {NzTagModule} from 'ng-zorro-antd/tag';
-import {NzImageModule} from 'ng-zorro-antd/image';
 import {firstValueFrom} from 'rxjs';
 import {LoadingService} from '../loading.service';
-import {NzImageViewComponent} from 'ng-zorro-antd/experimental/image';
 import Reveal from 'reveal.js';
 
 @Component({
@@ -32,10 +29,7 @@ import Reveal from 'reveal.js';
     NzSpinModule,
     NzListModule,
     NzCardModule,
-    NzModalModule,
-    NzTagModule,
-    NzImageModule,
-    NzImageViewComponent
+    NzTagModule
   ],
   templateUrl: './decks-page.component.html',
   styleUrls: ['./decks-page.component.css']
@@ -124,11 +118,6 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     this.selectedDeck = undefined;
     this.destroyReveal();
   }
-
-  onSlideshowOpened() {
-    void this.initializeReveal();
-  }
-
 
   trackDeck(_: number, deck: LessonDeck) {
     return deck.id;
