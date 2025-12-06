@@ -150,8 +150,6 @@
                   @if (selectedDeck) {
                     <section>
                       <h2>{{ selectedDeck.topic }}</h2>
-                      <div class="cover-meta">Deck ID: {{ selectedDeck.id }}</div>
-                      <div class="cover-meta">Generated: {{ selectedDeck.createdAt | date: 'medium' }}</div>
                       @if (lastRequest?.gradeLevel) {
                         <div class="cover-meta">Grade Level: {{ lastRequest?.gradeLevel }}</div>
                       }
@@ -166,10 +164,23 @@
                         <h3>{{ slide.title }}</h3>
                       }
                       @if (slide.imageUrl) {
-                        <img
-                          [src]="slide.imageUrl"
-                          [alt]="slide.title || 'Slide image'"
-                          class="mx-auto my-4 max-h-64 w-full rounded-lg object-contain shadow-lg"/>
+                        <div
+                          class="slide-zoom-frame"
+                          [ngStyle]="{'--zoom-origin': slideZoomOrigin}"
+                          (mouseenter)="onSlideZoomEnter($event)"
+                          (mousemove)="onSlideZoomMove($event)"
+                          (mouseleave)="onSlideZoomLeave()">
+                          <img
+                            [src]="slide.imageUrl"
+                            [alt]="slide.title || 'Slide image'"
+                            class="slide-image"
+                            [style.transform]="slideZooming ? 'scale(1.6)' : 'scale(1)'"
+                            [style.transform-origin]="slideZoomOrigin"/>
+                          <div class="slide-zoom-hint">
+                            <i nz-icon nzType="search"></i>
+                            <span>Hover to zoom</span>
+                          </div>
+                        </div>
                       }
                       @if (slide.text) {
                         <div class="slide-note">{{ slide.text }}</div>

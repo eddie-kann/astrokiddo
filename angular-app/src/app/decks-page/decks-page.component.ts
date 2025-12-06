@@ -48,6 +48,8 @@ export class DecksPageComponent implements OnInit, OnDestroy {
   selectedDeck?: LessonDeck;
   lastRequest?: GenerateReq;
   slideshowLoading = false;
+  slideZooming = false;
+  slideZoomOrigin = '50% 50%';
 
   @ViewChild('revealRoot') private revealRoot?: ElementRef<HTMLDivElement>;
   private revealInstance?: Reveal.Api;
@@ -148,12 +150,50 @@ export class DecksPageComponent implements OnInit, OnDestroy {
       controls: true,
       progress: true,
       transition: 'slide',
-      backgroundTransition: 'fade'
+      backgroundTransition: 'fade',
+      width: 1280,
+      height: 720,
+      margin: 0.06,
+      minScale: 0.35,
+      maxScale: 1
     });
 
     await this.revealInstance.initialize();
+    this.revealInstance.on('slidechanged', () => this.resetSlideZoomOrigin());
     this.revealInstance.layout();
     this.revealInstance.slide(0);
+  }
+
+  onSlideZoomEnter(event: MouseEvent) {
+    this.slideZooming = true;
+    this.updateSlideZoomOrigin(event);
+  }
+
+  onSlideZoomMove(event: MouseEvent) {
+    if (!this.slideZooming) {
+      return;
+    }
+    this.updateSlideZoomOrigin(event);
+  }
+
+  onSlideZoomLeave() {
+    this.slideZooming = false;
+    this.resetSlideZoomOrigin();
+  }
+
+  private updateSlideZoomOrigin(event: MouseEvent) {
+    const target = event.currentTarget as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    this.slideZoomOrigin = `${x.toFixed(2)}% ${y.toFixed(2)}%`;
+  }
+
+  private resetSlideZoomOrigin() {
+    this.slideZoomOrigin = '50% 50%';
   }
 
   private destroyReveal() {
