@@ -64,6 +64,7 @@
               <nz-date-picker
                 [nzAllowClear]="true"
                 [nzInputReadOnly]="true"
+                [nzDisabledDate]="disabledDate"
                 [ngModel]="selectedDate"
                 (ngModelChange)="onDateChange($event)"
                 nzPlaceHolder="Pick a date"

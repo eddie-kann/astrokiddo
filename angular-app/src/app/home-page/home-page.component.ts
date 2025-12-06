@@ -26,6 +26,15 @@ export class HomePageComponent implements OnInit, OnDestroy {
   loading = false;
   error?: string;
   selectedDate: Date | null = null;
+  readonly minSelectableDate = this.startOfDay(new Date(2025, 11, 1));
+  readonly disabledDate = (current: Date): boolean => {
+    if (!current) {
+      return false;
+    }
+    const currentDay = this.startOfDay(current);
+    const today = this.startOfDay(new Date());
+    return currentDay < this.minSelectableDate || currentDay > today;
+  };
   playing = false;
   private waveSurfer?: WaveSurfer;
   @ViewChild('waveformContainer') waveformContainer?: ElementRef<HTMLDivElement>;
@@ -147,5 +156,11 @@ export class HomePageComponent implements OnInit, OnDestroy {
 
   private resetSlideZoomOrigin() {
     this.zoomOrigin = '50% 50%';
+  }
+
+  private startOfDay(date: Date): Date {
+    const copy = new Date(date);
+    copy.setHours(0, 0, 0, 0);
+    return copy;
   }
 }
