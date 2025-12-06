@@ -151,7 +151,8 @@ export class DecksPageComponent implements OnInit, OnDestroy {
 
     this.destroyReveal();
 
-    this.revealInstance = new revealGlobal({
+    const revealContainer = this.revealRoot.nativeElement;
+    this.revealInstance = new revealGlobal(revealContainer, {
       embedded: true,
       hash: false,
       controls: true,
