@@ -148,6 +148,7 @@
               <div class="reveal" #revealRoot>
                 <div class="slides">
                   @if (selectedDeck) {
+                    <section>
                       <h2>{{ selectedDeck.topic }}</h2>
                       @if (lastRequest?.gradeLevel) {
                         <div class="cover-meta">Grade Level: {{ lastRequest?.gradeLevel }}</div>
@@ -155,6 +156,7 @@
                       @if (selectedDeck.enrichment?.hook) {
                         <div class="cover-sub">{{ selectedDeck.enrichment?.hook }}</div>
                       }
+                    </section>
                   }
                   @for (slide of selectedDeck?.slides; track trackSlide($index, slide)) {
                       @if (slide.title) {
