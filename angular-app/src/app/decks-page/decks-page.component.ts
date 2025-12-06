@@ -143,7 +143,6 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     if (!this.selectedDeck) {
       return;
     }
-    const container = this.revealRoot?.nativeElement;
     const revealGlobal = (window as any).Reveal;
     if (!revealGlobal || !this.revealRoot?.nativeElement) {
       console.warn('Reveal.js failed to load.');
@@ -153,7 +152,6 @@ export class DecksPageComponent implements OnInit, OnDestroy {
     this.destroyReveal();
 
     this.revealInstance = new revealGlobal({
-      container,
       embedded: true,
       hash: false,
       controls: true,
